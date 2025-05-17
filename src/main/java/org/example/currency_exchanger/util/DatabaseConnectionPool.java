@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class DatabaseConnectionPool {
+public final class DatabaseConnectionPool {
 
     private static final String URL_KEY = "db.url";
     private static final String POOL_SIZE_KEY = "db.pool.size";
@@ -40,16 +40,6 @@ public class DatabaseConnectionPool {
     public static void returnConnection(Connection conn) {
         if (conn != null) {
             pool.offer(conn);
-        }
-    }
-
-    public static void shutdown() {
-        for (Connection conn : pool) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                throw new DatabaseAccessException(e.getMessage());
-            }
         }
     }
 
