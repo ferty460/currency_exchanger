@@ -1,4 +1,4 @@
-INSERT INTO currencies (code, fullName, sign)
+INSERT INTO currencies (code, full_name, sign)
 VALUES ('USD', 'US Dollar', '$'),
        ('EUR', 'Euro', '€'),
        ('RUB', 'Russian ruble', '₽'),
@@ -6,7 +6,7 @@ VALUES ('USD', 'US Dollar', '$'),
        ('BYN', 'Belarusian ruble', 'Br'),
        ('JPY', 'Yen', '¥');
 
-INSERT INTO exchange_rates (baseCurrencyId, targetCurrencyId, rate)
+INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate)
 VALUES (1, 2, 0.96),
        (1, 3, 91.34),
        (1, 5, 3.26),

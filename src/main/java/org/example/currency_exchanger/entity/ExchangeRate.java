@@ -14,6 +14,9 @@ public class ExchangeRate {
         this.rate = rate;
     }
 
+    public ExchangeRate() {
+    }
+
     public Long getId() {
         return id;
     }
@@ -28,6 +31,32 @@ public class ExchangeRate {
 
     public Double getRate() {
         return rate;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setBaseCurrency(Currency baseCurrency) {
+        this.baseCurrency = baseCurrency;
+    }
+
+    public void setTargetCurrency(Currency targetCurrency) {
+        this.targetCurrency = targetCurrency;
+    }
+
+    public void setRate(Double rate) {
+        this.rate = rate;
+    }
+
+    @Override
+    public String toString() {
+        return "ExchangeRate{" +
+               "id=" + id +
+               ", baseCurrency=" + baseCurrency +
+               ", targetCurrency=" + targetCurrency +
+               ", rate=" + rate +
+               '}';
     }
 
 }

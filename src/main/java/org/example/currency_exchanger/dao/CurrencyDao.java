@@ -16,7 +16,7 @@ public class CurrencyDao implements CrudDao<Currency> {
     private static final String FIND_ALL_SQL = """
             SELECT id,
                    code,
-                   fullName,
+                   full_name,
                    sign
             FROM currencies
             """;
@@ -24,14 +24,14 @@ public class CurrencyDao implements CrudDao<Currency> {
     private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + " WHERE id = ?;";
 
     private static final String SAVE_SQL = """
-            INSERT INTO currencies(code, fullName, sign)
+            INSERT INTO currencies(code, full_name, sign)
             VALUES (?, ?, ?);
             """;
 
     private static final String UPDATE_SQL = """
             UPDATE currencies
             SET code = ?,
-                fullName = ?,
+                full_name = ?,
                 sign = ?
             WHERE id = ?;
             """;
@@ -40,7 +40,7 @@ public class CurrencyDao implements CrudDao<Currency> {
             DELETE FROM currencies WHERE id = ?;
             """;
 
-    public CurrencyDao() {
+    private CurrencyDao() {
     }
 
     public static CurrencyDao getInstance() {
@@ -112,7 +112,7 @@ public class CurrencyDao implements CrudDao<Currency> {
         return new Currency(
                 resultSet.getLong("id"),
                 resultSet.getString("code"),
-                resultSet.getString("fullName"),
+                resultSet.getString("full_name"),
                 resultSet.getString("sign")
         );
     }
