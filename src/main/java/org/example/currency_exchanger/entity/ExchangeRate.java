@@ -37,18 +37,6 @@ public class ExchangeRate {
         this.id = id;
     }
 
-    public void setBaseCurrency(Currency baseCurrency) {
-        this.baseCurrency = baseCurrency;
-    }
-
-    public void setTargetCurrency(Currency targetCurrency) {
-        this.targetCurrency = targetCurrency;
-    }
-
-    public void setRate(Double rate) {
-        this.rate = rate;
-    }
-
     @Override
     public String toString() {
         return "ExchangeRate{" +

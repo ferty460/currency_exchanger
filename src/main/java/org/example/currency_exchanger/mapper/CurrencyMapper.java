@@ -11,6 +11,10 @@ public final class CurrencyMapper implements EntityMapper<Currency, CurrencyDto>
     private CurrencyMapper() {
     }
 
+    public static CurrencyMapper getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public CurrencyDto toDto(Currency entity) {
         if (entity == null) {
@@ -35,10 +39,6 @@ public final class CurrencyMapper implements EntityMapper<Currency, CurrencyDto>
                 dto.fullName(),
                 dto.sign()
         );
-    }
-
-    public static CurrencyMapper getInstance() {
-        return INSTANCE;
     }
 
 }

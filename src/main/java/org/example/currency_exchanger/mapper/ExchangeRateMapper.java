@@ -15,6 +15,10 @@ public final class ExchangeRateMapper implements EntityMapper<ExchangeRate, Exch
     private ExchangeRateMapper() {
     }
 
+    public static ExchangeRateMapper getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public ExchangeRateDto toDto(ExchangeRate entity) {
         if (entity == null) {
@@ -39,10 +43,6 @@ public final class ExchangeRateMapper implements EntityMapper<ExchangeRate, Exch
                 currencyMapper.toEntity(dto.targetCurrencyDto()),
                 dto.rate()
         );
-    }
-
-    public static ExchangeRateMapper getInstance() {
-        return INSTANCE;
     }
 
 }

@@ -12,8 +12,17 @@ import java.util.List;
 
 public class CurrencyServiceImpl implements CurrencyService {
 
+    private static final CurrencyService INSTANCE = new CurrencyServiceImpl();
+
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
     private final EntityMapper<Currency, CurrencyDto> mapper = CurrencyMapper.getInstance();
+
+    private CurrencyServiceImpl() {
+    }
+
+    public static CurrencyService getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public List<CurrencyDto> getAll() {
