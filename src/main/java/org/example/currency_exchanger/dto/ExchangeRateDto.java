@@ -1,4 +1,4 @@
 package org.example.currency_exchanger.dto;
 
-public record ExchangeRateDto(Long id, CurrencyDto baseCurrencyDto, CurrencyDto targetCurrencyDto, Double rate) {
+public record ExchangeRateDto(Long id, CurrencyDto baseCurrency, CurrencyDto targetCurrencyDto, Double rate) {
 }

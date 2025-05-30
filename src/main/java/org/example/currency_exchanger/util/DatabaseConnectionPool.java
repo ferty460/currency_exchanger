@@ -1,5 +1,6 @@
 package org.example.currency_exchanger.util;
 
+import lombok.experimental.UtilityClass;
 import org.example.currency_exchanger.exception.DatabaseAccessException;
 
 import java.sql.Connection;
@@ -8,7 +9,8 @@ import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public final class DatabaseConnectionPool {
+@UtilityClass
+public class DatabaseConnectionPool {
 
     private static final String URL_KEY = "db.url";
     private static final String POOL_SIZE_KEY = "db.pool.size";
@@ -21,9 +23,6 @@ public final class DatabaseConnectionPool {
         loadDriver();
 
         initConnectionPool();
-    }
-
-    private DatabaseConnectionPool() {
     }
 
     public static Connection getConnection() {

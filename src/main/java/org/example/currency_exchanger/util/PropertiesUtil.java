@@ -1,18 +1,18 @@
 package org.example.currency_exchanger.util;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public final class PropertiesUtil {
+@UtilityClass
+public class PropertiesUtil {
 
     private static final Properties PROPERTIES = new Properties();
 
     static {
         loadProperties();
-    }
-
-    private PropertiesUtil() {
     }
 
     public static String getProperty(String key) {

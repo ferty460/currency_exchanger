@@ -12,7 +12,7 @@ import java.util.List;
 public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
-    private final ExchangeRateMapper mapper = ExchangeRateMapper.getInstance();
+    private final ExchangeRateMapper mapper = ExchangeRateMapper.INSTANCE;
 
     @Override
     public List<ExchangeRateDto> getAll() {

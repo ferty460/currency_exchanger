@@ -55,7 +55,12 @@ public class CurrencyServlet extends HttpServlet {
         String servletPath = req.getServletPath();
 
         if ("/currencies".equals(servletPath)) {
-            CurrencyDto currency = mapper.readValue(req.getInputStream(), CurrencyDto.class);
+            CurrencyDto currency = new CurrencyDto(
+                    0L,
+                    req.getParameter("code"),
+                    req.getParameter("fullName"),
+                    req.getParameter("sign")
+            );
 
             if (currency.fullName() == null || currency.code() == null || currency.sign() == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing currency fields");
@@ -73,6 +78,5 @@ public class CurrencyServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
-
 
 }

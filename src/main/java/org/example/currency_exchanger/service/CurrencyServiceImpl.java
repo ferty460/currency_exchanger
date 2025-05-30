@@ -6,7 +6,6 @@ import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.mapper.CurrencyMapper;
-import org.example.currency_exchanger.mapper.EntityMapper;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     private static final CurrencyService INSTANCE = new CurrencyServiceImpl();
 
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
-    private final EntityMapper<Currency, CurrencyDto> mapper = CurrencyMapper.getInstance();
+    private final CurrencyMapper mapper = CurrencyMapper.INSTANCE;
 
     private CurrencyServiceImpl() {
     }
@@ -26,9 +25,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public List<CurrencyDto> getAll() {
-        return currencyDao.findAll().stream()
-                .map(mapper::toDto)
-                .toList();
+        return mapper.toDtoList(currencyDao.findAll());
     }
 
     @Override

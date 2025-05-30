@@ -1,14 +1,13 @@
 package org.example.currency_exchanger.util.template;
 
+import lombok.experimental.UtilityClass;
 import org.example.currency_exchanger.exception.DaoException;
 import org.example.currency_exchanger.util.DatabaseConnectionPool;
 
 import java.sql.*;
 
-public final class JdbcTemplate {
-
-    private JdbcTemplate() {
-    }
+@UtilityClass
+public class JdbcTemplate {
 
     public static <T> T query(String query, StatementSetter setter, ResultSetExtractor<T> extractor) {
         Connection conn = DatabaseConnectionPool.getConnection();
