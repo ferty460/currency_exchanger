@@ -11,8 +11,17 @@ import java.util.List;
 
 public class ExchangeRateServiceImpl implements ExchangeRateService {
 
+    private static final ExchangeRateService INSTANCE = new ExchangeRateServiceImpl();
+
     private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
     private final ExchangeRateMapper mapper = ExchangeRateMapper.INSTANCE;
+
+    private ExchangeRateServiceImpl() {
+    }
+
+    public static ExchangeRateService getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public List<ExchangeRateDto> getAll() {
