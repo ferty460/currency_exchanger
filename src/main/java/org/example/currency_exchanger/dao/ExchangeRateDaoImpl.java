@@ -42,9 +42,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 
     private static final String UPDATE_SQL = """
             UPDATE exchange_rates
-            SET base_currency_id = ?,
-                target_currency_id = ?,
-                rate = ?
+            SET rate = ?
             WHERE id = ?;
             """;
 
@@ -114,10 +112,8 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
         JdbcTemplate.update(
                 UPDATE_SQL,
                 stmt -> {
-                    stmt.setLong(1, entity.getBaseCurrency().getId());
-                    stmt.setLong(2, entity.getTargetCurrency().getId());
-                    stmt.setDouble(3, entity.getRate());
-                    stmt.setLong(4, entity.getId());
+                    stmt.setDouble(1, entity.getRate());
+                    stmt.setLong(2, entity.getId());
                 }
         );
     }
