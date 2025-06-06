@@ -26,8 +26,6 @@ public class CurrencyServlet extends HttpServlet {
         if ("/currencies".equals(servletPath)) {
             List<CurrencyDto> currencies = currencyService.getAll();
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), currencies);
@@ -40,8 +38,6 @@ public class CurrencyServlet extends HttpServlet {
             String code = pathInfo.substring(1);
             CurrencyDto currency = currencyService.getByCode(code);
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), currency);
@@ -69,8 +65,6 @@ public class CurrencyServlet extends HttpServlet {
 
             CurrencyDto savedCurrency = currencyService.save(currency);
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), savedCurrency);

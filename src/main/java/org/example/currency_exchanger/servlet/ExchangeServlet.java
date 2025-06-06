@@ -25,6 +25,8 @@ public class ExchangeServlet extends HttpServlet {
 
         ExchangeDto exchangeDto = exchangeService.exchange(base, target, amount);
 
+        resp.setStatus(HttpServletResponse.SC_OK);
+
         mapper.writeValue(resp.getWriter(), exchangeDto);
     }
 

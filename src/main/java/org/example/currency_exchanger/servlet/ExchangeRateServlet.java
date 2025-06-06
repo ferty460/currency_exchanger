@@ -37,8 +37,6 @@ public class ExchangeRateServlet extends HttpServlet {
         if ("/exchangeRates".equals(servletPath)) {
             List<ExchangeRateDto> exchangeRates = exchangeRateService.getAll();
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), exchangeRates);
@@ -54,8 +52,6 @@ public class ExchangeRateServlet extends HttpServlet {
 
             ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), exchangeRate);
@@ -82,8 +78,6 @@ public class ExchangeRateServlet extends HttpServlet {
 
             ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), savedExchangeRate);
@@ -117,8 +111,6 @@ public class ExchangeRateServlet extends HttpServlet {
 
             exchangeRateService.update(updatedExchangeRate);
 
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
             resp.setStatus(HttpServletResponse.SC_OK);
 
             mapper.writeValue(resp.getWriter(), updatedExchangeRate);
