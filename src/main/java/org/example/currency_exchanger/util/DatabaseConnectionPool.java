@@ -43,7 +43,7 @@ public class DatabaseConnectionPool {
         try {
             Class.forName(PropertiesUtil.getProperty(DRIVER_KEY));
         } catch (ClassNotFoundException e) {
-            throw new DatabaseAccessException(e.getMessage());
+            throw new DatabaseAccessException("Database driver is not found: " + e.getMessage());
         }
     }
 

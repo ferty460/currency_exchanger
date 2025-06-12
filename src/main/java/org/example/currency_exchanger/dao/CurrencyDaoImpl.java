@@ -86,7 +86,7 @@ public class CurrencyDaoImpl implements CurrencyDao {
                 SAVE_SQL,
                 stmt -> {
                     stmt.setString(1, entity.getCode());
-                    stmt.setString(2, entity.getFullName());
+                    stmt.setString(2, entity.getName());
                     stmt.setString(3, entity.getSign());
                 }
         );
@@ -102,7 +102,7 @@ public class CurrencyDaoImpl implements CurrencyDao {
                 UPDATE_SQL,
                 stmt -> {
                     stmt.setString(1, entity.getCode());
-                    stmt.setString(2, entity.getFullName());
+                    stmt.setString(2, entity.getName());
                     stmt.setString(3, entity.getSign());
                     stmt.setLong(4, entity.getId());
                 }

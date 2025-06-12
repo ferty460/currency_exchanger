@@ -1,7 +1,7 @@
 package org.example.currency_exchanger.util.template;
 
 import lombok.experimental.UtilityClass;
-import org.example.currency_exchanger.exception.DaoException;
+import org.example.currency_exchanger.exception.DatabaseAccessException;
 import org.example.currency_exchanger.util.DatabaseConnectionPool;
 
 import java.sql.*;
@@ -17,7 +17,7 @@ public class JdbcTemplate {
             ResultSet rs = stmt.executeQuery();
             return extractor.extract(rs);
         } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+            throw new DatabaseAccessException("Database access error: " + e.getMessage());
         } finally {
             DatabaseConnectionPool.returnConnection(conn);
         }
@@ -30,7 +30,7 @@ public class JdbcTemplate {
             setter.set(stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+            throw new DatabaseAccessException("Database access error: " + e.getMessage());
         } finally {
             DatabaseConnectionPool.returnConnection(conn);
         }
@@ -46,7 +46,7 @@ public class JdbcTemplate {
             ResultSet rs = stmt.getGeneratedKeys();
             return rs.next() ? rs.getLong(1) : 0L;
         } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
+            throw new DatabaseAccessException("Database access error: " + e.getMessage());
         } finally {
             DatabaseConnectionPool.returnConnection(conn);
         }

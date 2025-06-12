@@ -6,6 +6,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.currency_exchanger.dto.CurrencyDto;
+import org.example.currency_exchanger.exception.DuplicateException;
+import org.example.currency_exchanger.exception.NotFoundException;
+import org.example.currency_exchanger.exception.ValidationException;
 import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
 
@@ -23,26 +26,24 @@ public class CurrencyServlet extends HttpServlet {
         String servletPath = req.getServletPath();
         String pathInfo = req.getPathInfo();
 
-        if ("/currencies".equals(servletPath)) {
-            List<CurrencyDto> currencies = currencyService.getAll();
+        try {
+            if ("/currencies".equals(servletPath)) {
+                List<CurrencyDto> currencies = currencyService.getAll();
 
-            resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setStatus(HttpServletResponse.SC_OK);
+                mapper.writeValue(resp.getWriter(), currencies);
+            } else if (servletPath.startsWith("/currency")) {
+                CurrencyDto currency = currencyService.getByCode(pathInfo);
 
-            mapper.writeValue(resp.getWriter(), currencies);
-        } else if (servletPath.startsWith("/currency")) {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Currency code is missing");
-                return;
+                resp.setStatus(HttpServletResponse.SC_OK);
+                mapper.writeValue(resp.getWriter(), currency);
             }
-
-            String code = pathInfo.substring(1);
-            CurrencyDto currency = currencyService.getByCode(code);
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-
-            mapper.writeValue(resp.getWriter(), currency);
-        } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        } catch (ValidationException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -50,26 +51,25 @@ public class CurrencyServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String servletPath = req.getServletPath();
 
-        if ("/currencies".equals(servletPath)) {
-            CurrencyDto currency = new CurrencyDto(
-                    0L,
-                    req.getParameter("code"),
-                    req.getParameter("name"),
-                    req.getParameter("sign")
-            );
+        try {
+            if ("/currencies".equals(servletPath)) {
+                CurrencyDto currency = new CurrencyDto(
+                        0L,
+                        req.getParameter("code"),
+                        req.getParameter("name"),
+                        req.getParameter("sign")
+                );
+                CurrencyDto savedCurrency = currencyService.save(currency);
 
-            if (currency.fullName() == null || currency.code() == null || currency.sign() == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing currency fields");
-                return;
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+                mapper.writeValue(resp.getWriter(), savedCurrency);
             }
-
-            CurrencyDto savedCurrency = currencyService.save(currency);
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-
-            mapper.writeValue(resp.getWriter(), savedCurrency);
-        } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        } catch (ValidationException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (DuplicateException e) {
+            resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

@@ -4,8 +4,12 @@ import org.example.currency_exchanger.dao.CurrencyDao;
 import org.example.currency_exchanger.dao.CurrencyDaoImpl;
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.entity.Currency;
+import org.example.currency_exchanger.exception.DuplicateException;
 import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.mapper.CurrencyMapper;
+import org.example.currency_exchanger.validation.CurrencyValidator;
+import org.example.currency_exchanger.validation.PathValidator;
+import org.example.currency_exchanger.validation.Validator;
 
 import java.util.List;
 
@@ -15,6 +19,9 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
     private final CurrencyMapper mapper = CurrencyMapper.INSTANCE;
+
+    private final Validator<CurrencyDto> currencyValidator = new CurrencyValidator();
+    private final Validator<String> pathValidator = new PathValidator();
 
     private CurrencyServiceImpl() {
     }
@@ -29,15 +36,25 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public CurrencyDto getByCode(String code) {
+    public CurrencyDto getByCode(String pathInfo) {
+        pathValidator.validate(pathInfo);
+
+        String code = pathInfo.substring(1).toUpperCase();
         Currency currency = currencyDao.findByCode(code)
-                .orElseThrow(() -> new NotFoundException("Currency with code " + code + " not found"));
+                .orElseThrow(() -> new NotFoundException("Currency with code '" + code + "' is not found"));
 
         return mapper.toDto(currency);
     }
 
     @Override
     public CurrencyDto save(CurrencyDto currencyDto) {
+        currencyValidator.validate(currencyDto);
+
+        String code = currencyDto.code().toUpperCase();
+        if (currencyDao.findByCode(code).isPresent()) {
+            throw new DuplicateException("Currency with code '" + code + "' already exists");
+        }
+
         Currency currency = mapper.toEntity(currencyDto);
 
         return mapper.toDto(currencyDao.save(currency));
