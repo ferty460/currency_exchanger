@@ -19,9 +19,7 @@ import org.example.currency_exchanger.validation.ExchangeRateValidator;
 import org.example.currency_exchanger.validation.PathValidator;
 import org.example.currency_exchanger.validation.Validator;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -115,20 +113,19 @@ public class ExchangeRateServlet extends HttpServlet {
 
                 Map<String, String> params = getRequestParameters(req);
                 String codes = pathInfo.substring(1);
+                String base = codes.substring(0, 3);
+                String target = codes.substring(3);
+                String rate = params.get("rate");
 
-                ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
-                        codes.substring(0, 3), codes.substring(3), params.get("rate")
-                );
+                ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(base, target, rate);
                 exchangeRateValidator.validate(exchangeRateRequest);
 
-                ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(
-                        exchangeRateRequest.base(), exchangeRateRequest.target()
-                );
+                ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(base, target);
                 ExchangeRateDto updatedExchangeRate = new ExchangeRateDto(
                         exchangeRate.id(),
                         exchangeRate.baseCurrency(),
                         exchangeRate.targetCurrency(),
-                        Double.valueOf(exchangeRateRequest.rate())
+                        Double.valueOf(rate)
                 );
 
                 exchangeRateService.update(updatedExchangeRate);
