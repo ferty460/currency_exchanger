@@ -7,10 +7,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.dto.ExchangeRateDto;
+import org.example.currency_exchanger.dto.ExchangeRateRequest;
+import org.example.currency_exchanger.exception.DuplicateException;
+import org.example.currency_exchanger.exception.NotFoundException;
+import org.example.currency_exchanger.exception.ValidationException;
 import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.service.ExchangeRateService;
 import org.example.currency_exchanger.service.ExchangeRateServiceImpl;
+import org.example.currency_exchanger.validation.ExchangeRateValidator;
+import org.example.currency_exchanger.validation.PathValidator;
+import org.example.currency_exchanger.validation.Validator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,60 +37,70 @@ public class ExchangeRateServlet extends HttpServlet {
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private final Validator<String> pathValidator = new PathValidator();
+    private final Validator<ExchangeRateRequest> exchangeRateValidator = new ExchangeRateValidator();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String servletPath = req.getServletPath();
         String pathInfo = req.getPathInfo();
 
-        if ("/exchangeRates".equals(servletPath)) {
-            List<ExchangeRateDto> exchangeRates = exchangeRateService.getAll();
+        try {
+            if ("/exchangeRates".equals(servletPath)) {
+                List<ExchangeRateDto> exchangeRates = exchangeRateService.getAll();
 
-            resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setStatus(HttpServletResponse.SC_OK);
+                mapper.writeValue(resp.getWriter(), exchangeRates);
+            } else if (servletPath.startsWith("/exchangeRate")) {
+                pathValidator.validate(pathInfo);
 
-            mapper.writeValue(resp.getWriter(), exchangeRates);
-        } else if (servletPath.startsWith("/exchangeRate")) {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Currency code is missing");
-                return;
+                String codes = pathInfo.substring(1);
+                String baseCode = codes.substring(0, 3);
+                String targetCode = codes.substring(3);
+
+                ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
+                mapper.writeValue(resp.getWriter(), exchangeRate);
             }
-
-            String codes = pathInfo.substring(1);
-            String baseCode = codes.substring(0, 3);
-            String targetCode = codes.substring(3);
-
-            ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-
-            mapper.writeValue(resp.getWriter(), exchangeRate);
-        } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        } catch (ValidationException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String servletPath = req.getServletPath();
+        try {
+            if ("/exchangeRates".equals(req.getServletPath())) {
+                ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
+                        req.getParameter("baseCurrencyCode"),
+                        req.getParameter("targetCurrencyCode"),
+                        req.getParameter("rate")
+                );
+                exchangeRateValidator.validate(exchangeRateRequest);
 
-        if ("/exchangeRates".equals(servletPath)) {
-            String baseCurrency = req.getParameter("baseCurrency");
-            String targetCurrency = req.getParameter("targetCurrency");
-            Double rate = Double.valueOf(req.getParameter("rate"));
+                CurrencyDto base = currencyService.getByCode(exchangeRateRequest.base());
+                CurrencyDto target = currencyService.getByCode(exchangeRateRequest.target());
+                Double rate = Double.valueOf(exchangeRateRequest.rate());
 
-            CurrencyDto baseCurrencyDto = currencyService.getByCode(baseCurrency);
-            CurrencyDto targetCurrencyDto = currencyService.getByCode(targetCurrency);
+                ExchangeRateDto exchangeRateDto = new ExchangeRateDto(0L, base, target, rate);
+                ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
 
-            ExchangeRateDto exchangeRateDto = new ExchangeRateDto(
-                    0L, baseCurrencyDto, targetCurrencyDto, rate
-            );
-
-            ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-
-            mapper.writeValue(resp.getWriter(), savedExchangeRate);
-        } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+                mapper.writeValue(resp.getWriter(), savedExchangeRate);
+            }
+        } catch (ValidationException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (DuplicateException e) {
+            resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -91,42 +109,64 @@ public class ExchangeRateServlet extends HttpServlet {
         String servletPath = req.getServletPath();
         String pathInfo = req.getPathInfo();
 
-        if (servletPath.startsWith("/exchangeRate")) {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Currency code is missing");
-                return;
+        try {
+            if (servletPath.startsWith("/exchangeRate")) {
+                pathValidator.validate(pathInfo);
+
+                Map<String, String> params = getRequestParameters(req);
+                String codes = pathInfo.substring(1);
+
+                ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
+                        codes.substring(0, 3), codes.substring(3), params.get("rate")
+                );
+                exchangeRateValidator.validate(exchangeRateRequest);
+
+                ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(
+                        exchangeRateRequest.base(), exchangeRateRequest.target()
+                );
+                ExchangeRateDto updatedExchangeRate = new ExchangeRateDto(
+                        exchangeRate.id(),
+                        exchangeRate.baseCurrency(),
+                        exchangeRate.targetCurrency(),
+                        Double.valueOf(exchangeRateRequest.rate())
+                );
+
+                exchangeRateService.update(updatedExchangeRate);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
+                mapper.writeValue(resp.getWriter(), updatedExchangeRate);
             }
-
-            String codes = pathInfo.substring(1);
-            String baseCode = codes.substring(0, 3);
-            String targetCode = codes.substring(3);
-
-            ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
-
-            Map<String, String> params = getRequestParameters(req);
-            Double rate = Double.valueOf(params.get("rate"));
-            ExchangeRateDto updatedExchangeRate = new ExchangeRateDto(
-                    exchangeRate.id(), exchangeRate.baseCurrency(), exchangeRate.targetCurrency(), rate
-            );
-
-            exchangeRateService.update(updatedExchangeRate);
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-
-            mapper.writeValue(resp.getWriter(), updatedExchangeRate);
-        } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        } catch (ValidationException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     private Map<String, String> getRequestParameters(HttpServletRequest req) throws IOException {
-        String body = new BufferedReader(new InputStreamReader(req.getInputStream()))
-                .lines().collect(Collectors.joining("\n"));
+        String body = req.getReader().lines().collect(Collectors.joining());
+        if (body.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
         return Arrays.stream(body.split("&"))
-                .map(param -> param.split("="))
-                .collect(Collectors.toMap(p -> URLDecoder.decode(p[0], StandardCharsets.UTF_8),
-                        p -> URLDecoder.decode(p[1], StandardCharsets.UTF_8)));
+                .map(param -> param.split("=", 2))
+                .filter(pair -> pair.length == 2)
+                .collect(Collectors.toMap(
+                        pair -> decodeUrlParam(pair[0]),
+                        pair -> decodeUrlParam(pair[1]),
+                        (oldVal, newVal) -> newVal
+                ));
+    }
+
+    private String decodeUrlParam(String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return value;
+        }
     }
 
 }

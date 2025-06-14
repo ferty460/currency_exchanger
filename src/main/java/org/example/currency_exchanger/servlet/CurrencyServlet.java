@@ -11,6 +11,8 @@ import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.exception.ValidationException;
 import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
+import org.example.currency_exchanger.validation.PathValidator;
+import org.example.currency_exchanger.validation.Validator;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +22,8 @@ public class CurrencyServlet extends HttpServlet {
 
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
     private final ObjectMapper mapper = new ObjectMapper();
+
+    private final Validator<String> pathValidator = new PathValidator();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -33,7 +37,10 @@ public class CurrencyServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 mapper.writeValue(resp.getWriter(), currencies);
             } else if (servletPath.startsWith("/currency")) {
-                CurrencyDto currency = currencyService.getByCode(pathInfo);
+                pathValidator.validate(pathInfo);
+
+                String code = pathInfo.substring(1).toUpperCase();
+                CurrencyDto currency = currencyService.getByCode(code);
 
                 resp.setStatus(HttpServletResponse.SC_OK);
                 mapper.writeValue(resp.getWriter(), currency);

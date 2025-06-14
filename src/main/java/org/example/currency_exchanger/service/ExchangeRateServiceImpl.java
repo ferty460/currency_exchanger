@@ -4,6 +4,7 @@ import org.example.currency_exchanger.dao.ExchangeRateDao;
 import org.example.currency_exchanger.dao.ExchangeRateDaoImpl;
 import org.example.currency_exchanger.dto.ExchangeRateDto;
 import org.example.currency_exchanger.entity.ExchangeRate;
+import org.example.currency_exchanger.exception.DuplicateException;
 import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.mapper.ExchangeRateMapper;
 
@@ -34,13 +35,20 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     public ExchangeRateDto getByBaseCodeAndTargetCode(String baseCode, String targetCode) {
         ExchangeRate exchangeRate = exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode)
                 .orElseThrow(() -> new NotFoundException(String.format(
-                        "Currency with base code %s and target code %s not found", baseCode, targetCode)));
+                        "Exchange Rate with base code %s and target code %s is not found", baseCode, targetCode)));
 
         return mapper.toDto(exchangeRate);
     }
 
     @Override
     public ExchangeRateDto save(ExchangeRateDto exchangeRateDto) {
+        String baseCode = exchangeRateDto.baseCurrency().code();
+        String targetCode = exchangeRateDto.targetCurrency().code();
+
+        if (exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode).isPresent()) {
+            throw new DuplicateException("Exchange rate with such codes already exists.");
+        }
+
         ExchangeRate exchangeRate = mapper.toEntity(exchangeRateDto);
 
         return mapper.toDto(exchangeRateDao.save(exchangeRate));

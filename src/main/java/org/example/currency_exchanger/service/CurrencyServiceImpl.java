@@ -21,7 +21,6 @@ public class CurrencyServiceImpl implements CurrencyService {
     private final CurrencyMapper mapper = CurrencyMapper.INSTANCE;
 
     private final Validator<CurrencyDto> currencyValidator = new CurrencyValidator();
-    private final Validator<String> pathValidator = new PathValidator();
 
     private CurrencyServiceImpl() {
     }
@@ -36,10 +35,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public CurrencyDto getByCode(String pathInfo) {
-        pathValidator.validate(pathInfo);
-
-        String code = pathInfo.substring(1).toUpperCase();
+    public CurrencyDto getByCode(String code) {
         Currency currency = currencyDao.findByCode(code)
                 .orElseThrow(() -> new NotFoundException("Currency with code '" + code + "' is not found"));
 
