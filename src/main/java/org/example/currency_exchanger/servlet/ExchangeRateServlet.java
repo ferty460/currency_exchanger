@@ -1,6 +1,5 @@
 package org.example.currency_exchanger.servlet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,25 +14,20 @@ import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.service.ExchangeRateService;
 import org.example.currency_exchanger.service.ExchangeRateServiceImpl;
+import org.example.currency_exchanger.util.WebUtil;
 import org.example.currency_exchanger.validation.ExchangeRateValidator;
 import org.example.currency_exchanger.validation.PathValidator;
 import org.example.currency_exchanger.validation.Validator;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @WebServlet(urlPatterns = {"/exchangeRates", "/exchangeRate/*"})
 public class ExchangeRateServlet extends HttpServlet {
 
     private final ExchangeRateService exchangeRateService = ExchangeRateServiceImpl.getInstance();
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
-    private final ObjectMapper mapper = new ObjectMapper();
 
     private final Validator<String> pathValidator = new PathValidator();
     private final Validator<ExchangeRateRequest> exchangeRateValidator = new ExchangeRateValidator();
@@ -47,8 +41,7 @@ public class ExchangeRateServlet extends HttpServlet {
             if ("/exchangeRates".equals(servletPath)) {
                 List<ExchangeRateDto> exchangeRates = exchangeRateService.getAll();
 
-                resp.setStatus(HttpServletResponse.SC_OK);
-                mapper.writeValue(resp.getWriter(), exchangeRates);
+                WebUtil.sendResponse(resp, exchangeRates, HttpServletResponse.SC_OK);
             } else if (servletPath.startsWith("/exchangeRate")) {
                 pathValidator.validate(pathInfo);
 
@@ -58,15 +51,14 @@ public class ExchangeRateServlet extends HttpServlet {
 
                 ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
 
-                resp.setStatus(HttpServletResponse.SC_OK);
-                mapper.writeValue(resp.getWriter(), exchangeRate);
+                WebUtil.sendResponse(resp, exchangeRate, HttpServletResponse.SC_OK);
             }
         } catch (ValidationException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -88,17 +80,16 @@ public class ExchangeRateServlet extends HttpServlet {
                 ExchangeRateDto exchangeRateDto = new ExchangeRateDto(0L, base, target, rate);
                 ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
 
-                resp.setStatus(HttpServletResponse.SC_CREATED);
-                mapper.writeValue(resp.getWriter(), savedExchangeRate);
+                WebUtil.sendResponse(resp, savedExchangeRate, HttpServletResponse.SC_CREATED);
             }
         } catch (ValidationException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (DuplicateException e) {
-            resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_CONFLICT, e.getMessage());
         } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -111,7 +102,7 @@ public class ExchangeRateServlet extends HttpServlet {
             if (servletPath.startsWith("/exchangeRate")) {
                 pathValidator.validate(pathInfo);
 
-                Map<String, String> params = getRequestParameters(req);
+                Map<String, String> params = WebUtil.getRequestParameters(req);
                 String codes = pathInfo.substring(1);
                 String base = codes.substring(0, 3);
                 String target = codes.substring(3);
@@ -130,39 +121,14 @@ public class ExchangeRateServlet extends HttpServlet {
 
                 exchangeRateService.update(updatedExchangeRate);
 
-                resp.setStatus(HttpServletResponse.SC_OK);
-                mapper.writeValue(resp.getWriter(), updatedExchangeRate);
+                WebUtil.sendResponse(resp, updatedExchangeRate, HttpServletResponse.SC_OK);
             }
         } catch (ValidationException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
-
-    private Map<String, String> getRequestParameters(HttpServletRequest req) throws IOException {
-        String body = req.getReader().lines().collect(Collectors.joining());
-        if (body.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        return Arrays.stream(body.split("&"))
-                .map(param -> param.split("=", 2))
-                .filter(pair -> pair.length == 2)
-                .collect(Collectors.toMap(
-                        pair -> decodeUrlParam(pair[0]),
-                        pair -> decodeUrlParam(pair[1]),
-                        (oldVal, newVal) -> newVal
-                ));
-    }
-
-    private String decodeUrlParam(String value) {
-        try {
-            return URLDecoder.decode(value, StandardCharsets.UTF_8);
-        } catch (IllegalArgumentException e) {
-            return value;
+            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

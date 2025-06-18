@@ -1,6 +1,5 @@
 package org.example.currency_exchanger.servlet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +10,7 @@ import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.exception.ValidationException;
 import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
+import org.example.currency_exchanger.util.WebUtil;
 import org.example.currency_exchanger.validation.PathValidator;
 import org.example.currency_exchanger.validation.Validator;
 
@@ -21,8 +21,6 @@ import java.util.List;
 public class CurrencyServlet extends HttpServlet {
 
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
-    private final ObjectMapper mapper = new ObjectMapper();
-
     private final Validator<String> pathValidator = new PathValidator();
 
     @Override
@@ -34,23 +32,21 @@ public class CurrencyServlet extends HttpServlet {
             if ("/currencies".equals(servletPath)) {
                 List<CurrencyDto> currencies = currencyService.getAll();
 
-                resp.setStatus(HttpServletResponse.SC_OK);
-                mapper.writeValue(resp.getWriter(), currencies);
+                WebUtil.sendResponse(resp, currencies, HttpServletResponse.SC_OK);
             } else if (servletPath.startsWith("/currency")) {
                 pathValidator.validate(pathInfo);
 
                 String code = pathInfo.substring(1).toUpperCase();
                 CurrencyDto currency = currencyService.getByCode(code);
 
-                resp.setStatus(HttpServletResponse.SC_OK);
-                mapper.writeValue(resp.getWriter(), currency);
+                WebUtil.sendResponse(resp, currency, HttpServletResponse.SC_OK);
             }
         } catch (ValidationException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -68,15 +64,14 @@ public class CurrencyServlet extends HttpServlet {
                 );
                 CurrencyDto savedCurrency = currencyService.save(currency);
 
-                resp.setStatus(HttpServletResponse.SC_CREATED);
-                mapper.writeValue(resp.getWriter(), savedCurrency);
+                WebUtil.sendResponse(resp, savedCurrency, HttpServletResponse.SC_CREATED);
             }
         } catch (ValidationException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (DuplicateException e) {
-            resp.sendError(HttpServletResponse.SC_CONFLICT, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_CONFLICT, e.getMessage());
         } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

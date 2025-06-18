@@ -5,7 +5,7 @@ import org.example.currency_exchanger.exception.ValidationException;
 
 public class CurrencyValidator implements Validator<CurrencyDto> {
 
-    private static final String CURRENCY_CODE_REGEX = "^[A-Z]{3}$";
+    private static final String CURRENCY_CODE_REGEX = "^[A-Za-z]{3}$";
 
     @Override
     public void validate(CurrencyDto currency) {
@@ -18,7 +18,7 @@ public class CurrencyValidator implements Validator<CurrencyDto> {
         if (currency.sign() == null || currency.sign().isBlank()) {
             throw new ValidationException("Missing required field: sign");
         }
-        if (!currency.name().matches(CURRENCY_CODE_REGEX)) {
+        if (!currency.code().matches(CURRENCY_CODE_REGEX)) {
             throw new ValidationException("Invalid currency code: " + currency.code());
         }
     }

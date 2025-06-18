@@ -30,6 +30,12 @@ public class ExchangeServiceImpl implements ExchangeService {
     public ExchangeDto exchange(String baseCode, String targetCode, String stringedAmount) {
         double amount = Double.parseDouble(stringedAmount);
 
+        Optional<Currency> baseCurrency = currencyDao.findByCode(baseCode);
+        Optional<Currency> targetCurrency = currencyDao.findByCode(targetCode);
+        if (baseCode.equals(targetCode) && baseCurrency.isPresent() && targetCurrency.isPresent()) {
+            return ExchangeFactory.createExchangeDto(baseCurrency.get(), targetCurrency.get(), 1.0, amount);
+        }
+
         Optional<ExchangeRate> directRate = exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode);
         if (directRate.isPresent()) {
             return ExchangeFactory.createExchangeFromExchangeRate(directRate.get(), amount, false);
@@ -44,12 +50,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         Optional<ExchangeRate> usdToTarget = exchangeRateDao.findByBaseCodeAndTargetCode("USD", targetCode);
         if (usdToBase.isPresent() && usdToTarget.isPresent()) {
             return ExchangeFactory.createCrossExchange(usdToBase.get(), usdToTarget.get(), amount);
-        }
-
-        Optional<Currency> baseCurrency = currencyDao.findByCode(baseCode);
-        Optional<Currency> targetCurrency = currencyDao.findByCode(targetCode);
-        if (baseCode.equals(targetCode) && baseCurrency.isPresent() && targetCurrency.isPresent()) {
-            return ExchangeFactory.createExchangeDto(baseCurrency.get(), targetCurrency.get(), 1.0, amount);
         }
 
         throw new NotFoundException("Can't find exchange rate to exchange");
