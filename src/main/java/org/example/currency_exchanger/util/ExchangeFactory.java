@@ -12,6 +12,9 @@ import java.math.RoundingMode;
 @UtilityClass
 public class ExchangeFactory {
 
+    private static final double BASE_RATE_VALUE = 1.0;
+    private static final int SCALE = 2;
+
     private final CurrencyMapper currencyMapper = CurrencyMapper.INSTANCE;
 
     public static ExchangeDto createExchangeDto(Currency base, Currency target, double rate, double amount) {
@@ -28,8 +31,8 @@ public class ExchangeFactory {
         Currency baseCurrency = isReverse ? exchangeRate.getTargetCurrency() : exchangeRate.getBaseCurrency();
         Currency targetCurrency = isReverse ? exchangeRate.getBaseCurrency() : exchangeRate.getTargetCurrency();
 
-        double rate = isReverse ? 1.0 / exchangeRate.getRate() : exchangeRate.getRate();
-        double roundedRate = BigDecimal.valueOf(rate).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        double rate = isReverse ? BASE_RATE_VALUE / exchangeRate.getRate() : exchangeRate.getRate();
+        double roundedRate = BigDecimal.valueOf(rate).setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
 
         return new ExchangeDto(
                 currencyMapper.toDto(baseCurrency),
@@ -42,7 +45,7 @@ public class ExchangeFactory {
 
     public static ExchangeDto createCrossExchange(ExchangeRate usdToBase, ExchangeRate usdToTarget, double amount) {
         double rate = usdToBase.getRate() / usdToTarget.getRate();
-        double roundedRate = BigDecimal.valueOf(rate).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        double roundedRate = BigDecimal.valueOf(rate).setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
 
         return new ExchangeDto(
                 currencyMapper.toDto(usdToBase.getTargetCurrency()),

@@ -19,6 +19,10 @@ import java.io.IOException;
 @WebServlet("/exchange")
 public class ExchangeServlet extends HttpServlet {
 
+    private static final String BASE_CURRENCY_PARAM = "from";
+    private static final String TARGET_CURRENCY_PARAM = "to";
+    private static final String AMOUNT_PARAM = "to";
+
     private final ExchangeService exchangeService = ExchangeServiceImpl.getInstance();
     private final Validator<ExchangeRequest> exchangeRequestValidator = new ExchangeValidator();
 
@@ -29,9 +33,9 @@ public class ExchangeServlet extends HttpServlet {
         }
 
         try {
-            String base = req.getParameter("from");
-            String target = req.getParameter("to");
-            String amount = req.getParameter("amount");
+            String base = req.getParameter(BASE_CURRENCY_PARAM);
+            String target = req.getParameter(TARGET_CURRENCY_PARAM);
+            String amount = req.getParameter(AMOUNT_PARAM);
 
             ExchangeRequest exchangeRequest = new ExchangeRequest(base, target, amount);
             exchangeRequestValidator.validate(exchangeRequest);

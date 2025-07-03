@@ -13,11 +13,13 @@ public class CurrencyDaoImpl implements CurrencyDao {
 
     private static final CurrencyDaoImpl INSTANCE = new CurrencyDaoImpl();
 
+    private static final String ID_COLUMN_NAME = "id";
+    private static final String CODE_COLUMN_NAME = "code";
+    private static final String FULL_NAME_COLUMN_NAME = "full_name";
+    private static final String SIGN_COLUMN_NAME = "sign";
+
     private static final String FIND_ALL_SQL = """
-            SELECT id,
-                   code,
-                   full_name,
-                   sign
+            SELECT id, code, full_name, sign
             FROM currencies
             """;
 
@@ -32,9 +34,7 @@ public class CurrencyDaoImpl implements CurrencyDao {
 
     private static final String UPDATE_SQL = """
             UPDATE currencies
-            SET code = ?,
-                full_name = ?,
-                sign = ?
+            SET code = ?, full_name = ?, sign = ?
             WHERE id = ?;
             """;
 
@@ -119,10 +119,10 @@ public class CurrencyDaoImpl implements CurrencyDao {
 
     private Currency buildCurrency(ResultSet resultSet) throws SQLException  {
         return new Currency(
-                resultSet.getLong("id"),
-                resultSet.getString("code"),
-                resultSet.getString("full_name"),
-                resultSet.getString("sign")
+                resultSet.getLong(ID_COLUMN_NAME),
+                resultSet.getString(CODE_COLUMN_NAME),
+                resultSet.getString(FULL_NAME_COLUMN_NAME),
+                resultSet.getString(SIGN_COLUMN_NAME)
         );
     }
 

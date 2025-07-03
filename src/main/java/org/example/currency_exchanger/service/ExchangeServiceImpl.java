@@ -16,14 +16,16 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private static final ExchangeService INSTANCE = new ExchangeServiceImpl();
 
+    private static final String USD_CODE = "USD";
+
     private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
 
-    private ExchangeServiceImpl() {
-    }
-
     public static ExchangeService getInstance() {
         return INSTANCE;
+    }
+
+    private ExchangeServiceImpl() {
     }
 
     @Override
@@ -46,8 +48,8 @@ public class ExchangeServiceImpl implements ExchangeService {
             return ExchangeFactory.createExchangeFromExchangeRate(reverseRate.get(), amount, true);
         }
 
-        Optional<ExchangeRate> usdToBase = exchangeRateDao.findByBaseCodeAndTargetCode("USD", baseCode);
-        Optional<ExchangeRate> usdToTarget = exchangeRateDao.findByBaseCodeAndTargetCode("USD", targetCode);
+        Optional<ExchangeRate> usdToBase = exchangeRateDao.findByBaseCodeAndTargetCode(USD_CODE, baseCode);
+        Optional<ExchangeRate> usdToTarget = exchangeRateDao.findByBaseCodeAndTargetCode(USD_CODE, targetCode);
         if (usdToBase.isPresent() && usdToTarget.isPresent()) {
             return ExchangeFactory.createCrossExchange(usdToBase.get(), usdToTarget.get(), amount);
         }

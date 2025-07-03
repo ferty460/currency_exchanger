@@ -8,7 +8,6 @@ import org.example.currency_exchanger.exception.DuplicateException;
 import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.mapper.CurrencyMapper;
 import org.example.currency_exchanger.validation.CurrencyValidator;
-import org.example.currency_exchanger.validation.PathValidator;
 import org.example.currency_exchanger.validation.Validator;
 
 import java.util.List;
@@ -46,12 +45,17 @@ public class CurrencyServiceImpl implements CurrencyService {
     public CurrencyDto save(CurrencyDto currencyDto) {
         currencyValidator.validate(currencyDto);
 
-        String code = currencyDto.code().toUpperCase();
+        String code = currencyDto.code().trim().toUpperCase();
+        String name = currencyDto.name().trim();
+        String sign = currencyDto.sign().trim();
+
         if (currencyDao.findByCode(code).isPresent()) {
             throw new DuplicateException("Currency with code '" + code + "' already exists");
         }
 
-        Currency currency = mapper.toEntity(currencyDto);
+        Currency currency = mapper.toEntity(
+                new CurrencyDto(currencyDto.id(), code, name, sign)
+        );
 
         return mapper.toDto(currencyDao.save(currency));
     }

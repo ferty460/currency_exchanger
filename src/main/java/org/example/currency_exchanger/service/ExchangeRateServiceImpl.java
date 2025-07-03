@@ -33,9 +33,11 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     @Override
     public ExchangeRateDto getByBaseCodeAndTargetCode(String baseCode, String targetCode) {
-        ExchangeRate exchangeRate = exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode)
-                .orElseThrow(() -> new NotFoundException(String.format(
-                        "Exchange Rate with base code %s and target code %s is not found", baseCode, targetCode)));
+        ExchangeRate exchangeRate = exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode).orElseThrow(
+                () -> new NotFoundException(("Exchange Rate with base code %s and target code %s is not found")
+                        .formatted(baseCode, targetCode)
+                )
+        );
 
         return mapper.toDto(exchangeRate);
     }

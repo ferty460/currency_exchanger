@@ -20,6 +20,10 @@ import java.util.List;
 @WebServlet(urlPatterns = {"/currencies", "/currency/*"})
 public class CurrencyServlet extends HttpServlet {
 
+    private static final String CODE_PARAM = "code";
+    private static final String NAME_PARAM = "name";
+    private static final String SIGN_PARAM = "sign";
+
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
     private final Validator<String> pathValidator = new PathValidator();
 
@@ -54,18 +58,20 @@ public class CurrencyServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String servletPath = req.getServletPath();
 
-        try {
-            if ("/currencies".equals(servletPath)) {
-                CurrencyDto currency = new CurrencyDto(
-                        0L,
-                        req.getParameter("code"),
-                        req.getParameter("name"),
-                        req.getParameter("sign")
-                );
-                CurrencyDto savedCurrency = currencyService.save(currency);
+        if (!"/currencies".equals(servletPath)) {
+            return;
+        }
 
-                WebUtil.sendResponse(resp, savedCurrency, HttpServletResponse.SC_CREATED);
-            }
+        try {
+            CurrencyDto currency = new CurrencyDto(
+                    0L,
+                    req.getParameter(CODE_PARAM),
+                    req.getParameter(NAME_PARAM),
+                    req.getParameter(SIGN_PARAM)
+            );
+            CurrencyDto savedCurrency = currencyService.save(currency);
+
+            WebUtil.sendResponse(resp, savedCurrency, HttpServletResponse.SC_CREATED);
         } catch (ValidationException e) {
             WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (DuplicateException e) {

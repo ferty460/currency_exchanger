@@ -23,10 +23,10 @@ public class JdbcTemplate {
         }
     }
 
-    public static void update(String sql, StatementSetter setter) {
+    public static void update(String query, StatementSetter setter) {
         Connection conn = DatabaseConnectionPool.getConnection();
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
             setter.set(stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -36,10 +36,10 @@ public class JdbcTemplate {
         }
     }
 
-    public static Long insert(String sql, StatementSetter setter) {
+    public static Long insert(String query, StatementSetter setter) {
         Connection conn = DatabaseConnectionPool.getConnection();
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             setter.set(stmt);
             stmt.executeUpdate();
 

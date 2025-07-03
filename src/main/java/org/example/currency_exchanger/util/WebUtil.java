@@ -16,6 +16,11 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class WebUtil {
 
+    private static final String MESSAGE_KEY = "message";
+    private static final String PARAM_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int MAX_PARAM_PAIR_PARTS = 2;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     public static void sendResponse(HttpServletResponse response, Object obj, int status) throws IOException {
@@ -25,7 +30,7 @@ public class WebUtil {
 
     public static void sendError(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
-        Map<String, String> error = Map.of("message", message);
+        Map<String, String> error = Map.of(MESSAGE_KEY, message);
         mapper.writeValue(response.getWriter(), error);
     }
 
@@ -35,9 +40,9 @@ public class WebUtil {
             return Collections.emptyMap();
         }
 
-        return Arrays.stream(body.split("&"))
-                .map(param -> param.split("=", 2))
-                .filter(pair -> pair.length == 2)
+        return Arrays.stream(body.split(PARAM_SEPARATOR))
+                .map(param -> param.split(KEY_VALUE_SEPARATOR, MAX_PARAM_PAIR_PARTS))
+                .filter(pair -> pair.length == MAX_PARAM_PAIR_PARTS)
                 .collect(Collectors.toMap(
                         pair -> decodeUrlParam(pair[0]),
                         pair -> decodeUrlParam(pair[1]),

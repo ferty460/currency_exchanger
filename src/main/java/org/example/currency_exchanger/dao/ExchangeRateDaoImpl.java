@@ -2,6 +2,7 @@ package org.example.currency_exchanger.dao;
 
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.entity.ExchangeRate;
+import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.util.template.JdbcTemplate;
 
 import java.sql.ResultSet;
@@ -14,21 +15,20 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 
     private static final ExchangeRateDaoImpl INSTANCE = new ExchangeRateDaoImpl();
 
+    private static final String ID_COLUMN_NAME = "id";
+    private static final String BASE_CURRENCY_ID_COLUMN_NAME = "base_currency_id";
+    private static final String TARGET_CURRENCY_ID_COLUMN_NAME = "target_currency_id";
+    private static final String RATE_COLUMN_NAME = "rate";
+
     private static final String FIND_ALL_SQL = """
-            SELECT id,
-                   base_currency_id,
-                   target_currency_id,
-                   rate
+            SELECT id, base_currency_id, target_currency_id, rate
             FROM exchange_rates
             """;
 
     private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + "WHERE id = ?";
 
     private static final String FIND_BY_BASE_AND_TARGET_CODE_SQL = """
-            SELECT er.id,
-                   er.base_currency_id,
-                   er.target_currency_id,
-                   er.rate
+            SELECT er.id, er.base_currency_id, er.target_currency_id, er.rate
             FROM exchange_rates er
             JOIN currencies bc ON er.base_currency_id = bc.id
             JOIN currencies tc ON er.target_currency_id = tc.id
@@ -129,17 +129,21 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
     private ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
         CurrencyDaoImpl currencyDao = CurrencyDaoImpl.getInstance();
 
-        long baseCurrencyId = resultSet.getLong("base_currency_id");
-        long targetCurrencyId = resultSet.getLong("target_currency_id");
+        long baseCurrencyId = resultSet.getLong(BASE_CURRENCY_ID_COLUMN_NAME);
+        long targetCurrencyId = resultSet.getLong(TARGET_CURRENCY_ID_COLUMN_NAME);
 
-        Currency baseCurrency = currencyDao.findById(baseCurrencyId).orElseThrow();
-        Currency targetCurrency = currencyDao.findById(targetCurrencyId).orElseThrow();
+        Currency baseCurrency = currencyDao.findById(baseCurrencyId).orElseThrow(
+                () -> new NotFoundException("Base currency with id " + baseCurrencyId + " not found")
+        );
+        Currency targetCurrency = currencyDao.findById(targetCurrencyId).orElseThrow(
+                () -> new NotFoundException("Target currency with id " + targetCurrencyId + " not found")
+        );
 
         return new ExchangeRate(
-                resultSet.getLong("id"),
+                resultSet.getLong(ID_COLUMN_NAME),
                 baseCurrency,
                 targetCurrency,
-                resultSet.getDouble("rate")
+                resultSet.getDouble(RATE_COLUMN_NAME)
         );
     }
 

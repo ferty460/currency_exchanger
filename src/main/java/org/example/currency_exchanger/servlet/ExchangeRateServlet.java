@@ -26,6 +26,12 @@ import java.util.Map;
 @WebServlet(urlPatterns = {"/exchangeRates", "/exchangeRate/*"})
 public class ExchangeRateServlet extends HttpServlet {
 
+    private static final int CODES_INDEX = 1;
+    private static final int CODE_LENGTH = 3;
+    private static final String BASE_CODE_PARAM = "baseCurrencyCode";
+    private static final String TARGET_CODE_PARAM = "targetCurrencyCode";
+    private static final String RATE_PARAM = "rate";
+
     private final ExchangeRateService exchangeRateService = ExchangeRateServiceImpl.getInstance();
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
 
@@ -45,9 +51,9 @@ public class ExchangeRateServlet extends HttpServlet {
             } else if (servletPath.startsWith("/exchangeRate")) {
                 pathValidator.validate(pathInfo);
 
-                String codes = pathInfo.substring(1);
-                String baseCode = codes.substring(0, 3);
-                String targetCode = codes.substring(3);
+                String codes = pathInfo.substring(CODES_INDEX);
+                String baseCode = codes.substring(0, CODE_LENGTH);
+                String targetCode = codes.substring(CODE_LENGTH);
 
                 ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
 
@@ -64,24 +70,26 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (!"/exchangeRates".equals(req.getServletPath())) {
+            return;
+        }
+
         try {
-            if ("/exchangeRates".equals(req.getServletPath())) {
-                ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
-                        req.getParameter("baseCurrencyCode"),
-                        req.getParameter("targetCurrencyCode"),
-                        req.getParameter("rate")
-                );
-                exchangeRateValidator.validate(exchangeRateRequest);
+            ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
+                    req.getParameter(BASE_CODE_PARAM),
+                    req.getParameter(TARGET_CODE_PARAM),
+                    req.getParameter(RATE_PARAM)
+            );
+            exchangeRateValidator.validate(exchangeRateRequest);
 
-                CurrencyDto base = currencyService.getByCode(exchangeRateRequest.base());
-                CurrencyDto target = currencyService.getByCode(exchangeRateRequest.target());
-                Double rate = Double.valueOf(exchangeRateRequest.rate());
+            CurrencyDto base = currencyService.getByCode(exchangeRateRequest.base());
+            CurrencyDto target = currencyService.getByCode(exchangeRateRequest.target());
+            Double rate = Double.valueOf(exchangeRateRequest.rate());
 
-                ExchangeRateDto exchangeRateDto = new ExchangeRateDto(0L, base, target, rate);
-                ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
+            ExchangeRateDto exchangeRateDto = new ExchangeRateDto(0L, base, target, rate);
+            ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
 
-                WebUtil.sendResponse(resp, savedExchangeRate, HttpServletResponse.SC_CREATED);
-            }
+            WebUtil.sendResponse(resp, savedExchangeRate, HttpServletResponse.SC_CREATED);
         } catch (ValidationException e) {
             WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {
@@ -95,34 +103,35 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String servletPath = req.getServletPath();
+        if (!req.getServletPath().startsWith("/exchangeRate")) {
+            return;
+        }
+
         String pathInfo = req.getPathInfo();
 
         try {
-            if (servletPath.startsWith("/exchangeRate")) {
-                pathValidator.validate(pathInfo);
+            pathValidator.validate(pathInfo);
 
-                Map<String, String> params = WebUtil.getRequestParameters(req);
-                String codes = pathInfo.substring(1);
-                String base = codes.substring(0, 3);
-                String target = codes.substring(3);
-                String rate = params.get("rate");
+            Map<String, String> params = WebUtil.getRequestParameters(req);
+            String codes = pathInfo.substring(CODES_INDEX);
 
-                ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(base, target, rate);
-                exchangeRateValidator.validate(exchangeRateRequest);
+            String base = codes.substring(0, CODE_LENGTH);
+            String target = codes.substring(CODE_LENGTH);
+            String rate = params.get(RATE_PARAM);
 
-                ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(base, target);
-                ExchangeRateDto updatedExchangeRate = new ExchangeRateDto(
-                        exchangeRate.id(),
-                        exchangeRate.baseCurrency(),
-                        exchangeRate.targetCurrency(),
-                        Double.valueOf(rate)
-                );
+            ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(base, target, rate);
+            exchangeRateValidator.validate(exchangeRateRequest);
 
-                exchangeRateService.update(updatedExchangeRate);
+            ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(base, target);
+            ExchangeRateDto updatedRate = new ExchangeRateDto(
+                    exchangeRate.id(),
+                    exchangeRate.baseCurrency(),
+                    exchangeRate.targetCurrency(),
+                    Double.valueOf(rate)
+            );
+            exchangeRateService.update(updatedRate);
 
-                WebUtil.sendResponse(resp, updatedExchangeRate, HttpServletResponse.SC_OK);
-            }
+            WebUtil.sendResponse(resp, updatedRate, HttpServletResponse.SC_OK);
         } catch (ValidationException e) {
             WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {

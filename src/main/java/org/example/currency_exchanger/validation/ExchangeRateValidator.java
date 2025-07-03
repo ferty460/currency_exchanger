@@ -28,6 +28,12 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
         } catch (NumberFormatException e) {
             throw new ValidationException("Field 'rate' must be a number");
         }
+
+        if (base.equals(target) && Double.parseDouble(rateStr) != 1.0) {
+            throw new ValidationException(
+                    "Exchange rate \"X → X\" should always be 1.0, since the currency is converted into itself."
+            );
+        }
     }
 
 }
