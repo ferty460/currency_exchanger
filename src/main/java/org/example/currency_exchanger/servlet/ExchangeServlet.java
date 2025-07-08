@@ -21,7 +21,7 @@ public class ExchangeServlet extends HttpServlet {
 
     private static final String BASE_CURRENCY_PARAM = "from";
     private static final String TARGET_CURRENCY_PARAM = "to";
-    private static final String AMOUNT_PARAM = "to";
+    private static final String AMOUNT_PARAM = "amount";
 
     private final ExchangeService exchangeService = ExchangeServiceImpl.getInstance();
     private final Validator<ExchangeRequest> exchangeRequestValidator = new ExchangeValidator();

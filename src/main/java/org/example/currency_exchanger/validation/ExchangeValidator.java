@@ -26,7 +26,7 @@ public class ExchangeValidator implements Validator<ExchangeRequest> {
                 throw new ValidationException("Amount must be greater than 0");
             }
         } catch (NumberFormatException e) {
-            throw new ValidationException("Field 'amount' must be a number");
+            throw new ValidationException("Field 'amount' must be a number: " + amount);
         }
     }
 
