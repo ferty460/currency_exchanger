@@ -17,6 +17,7 @@ public class ExchangeServiceImpl implements ExchangeService {
     private static final ExchangeService INSTANCE = new ExchangeServiceImpl();
 
     private static final String USD_CODE = "USD";
+    private static final double BASE_RATE = 1.0;
 
     private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
@@ -35,7 +36,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         Optional<Currency> baseCurrency = currencyDao.findByCode(baseCode);
         Optional<Currency> targetCurrency = currencyDao.findByCode(targetCode);
         if (baseCode.equals(targetCode) && baseCurrency.isPresent() && targetCurrency.isPresent()) {
-            return ExchangeFactory.createExchangeDto(baseCurrency.get(), targetCurrency.get(), 1.0, amount);
+            return ExchangeFactory.createExchangeDto(baseCurrency.get(), targetCurrency.get(), BASE_RATE, amount);
         }
 
         Optional<ExchangeRate> directRate = exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode);

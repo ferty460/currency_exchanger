@@ -22,7 +22,7 @@ public class ExchangeValidator implements Validator<ExchangeRequest> {
         }
 
         try {
-            if (Integer.parseInt(amount) < 0) {
+            if (Integer.parseInt(amount) <= 0) {
                 throw new ValidationException("Amount must be greater than 0");
             }
         } catch (NumberFormatException e) {

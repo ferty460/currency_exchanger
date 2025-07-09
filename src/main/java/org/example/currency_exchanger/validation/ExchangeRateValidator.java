@@ -22,7 +22,7 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
         }
 
         try {
-            if (Double.parseDouble(rateStr) < 0.0) {
+            if (Double.parseDouble(rateStr) <= 0.0) {
                 throw new ValidationException("Rate must be greater than 0");
             }
         } catch (NumberFormatException e) {

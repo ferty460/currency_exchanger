@@ -15,7 +15,7 @@ public class DatabaseConnectionPool {
     private static final String URL_KEY = "db.url";
     private static final String POOL_SIZE_KEY = "db.pool.size";
     private static final String DRIVER_KEY = "db.driver";
-    private static final Integer DEFAULT_POOL_SIZE = 10;
+    private static final int DEFAULT_POOL_SIZE = 10;
 
     private static BlockingQueue<Connection> pool;
 
