@@ -10,6 +10,7 @@ import org.example.currency_exchanger.entity.ExchangeRate;
 import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.util.ExchangeFactory;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public class ExchangeServiceImpl implements ExchangeService {
@@ -17,7 +18,7 @@ public class ExchangeServiceImpl implements ExchangeService {
     private static final ExchangeService INSTANCE = new ExchangeServiceImpl();
 
     private static final String USD_CODE = "USD";
-    private static final double BASE_RATE = 1.0;
+    private static final BigDecimal BASE_RATE = BigDecimal.ONE;
 
     private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();

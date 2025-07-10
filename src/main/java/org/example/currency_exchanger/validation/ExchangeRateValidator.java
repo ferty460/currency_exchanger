@@ -3,6 +3,8 @@ package org.example.currency_exchanger.validation;
 import org.example.currency_exchanger.dto.ExchangeRateRequest;
 import org.example.currency_exchanger.exception.ValidationException;
 
+import java.math.BigDecimal;
+
 public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
 
     @Override
@@ -21,8 +23,9 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
             throw new ValidationException("Missing required field: rate");
         }
 
+        BigDecimal rate = new BigDecimal(rateStr);
         try {
-            if (Double.parseDouble(rateStr) <= 0.0) {
+            if (rate.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new ValidationException("Rate must be greater than 0");
             }
         } catch (NumberFormatException e) {

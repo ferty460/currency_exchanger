@@ -28,10 +28,6 @@ public class ExchangeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (!req.getServletPath().startsWith("/exchange")) {
-            return;
-        }
-
         try {
             String base = req.getParameter(BASE_CURRENCY_PARAM);
             String target = req.getParameter(TARGET_CURRENCY_PARAM);

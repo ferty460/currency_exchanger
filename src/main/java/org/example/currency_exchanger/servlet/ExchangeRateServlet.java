@@ -20,6 +20,7 @@ import org.example.currency_exchanger.validation.PathValidator;
 import org.example.currency_exchanger.validation.Validator;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -70,10 +71,6 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (!"/exchangeRates".equals(req.getServletPath())) {
-            return;
-        }
-
         try {
             ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
                     req.getParameter(BASE_CODE_PARAM),
@@ -84,7 +81,7 @@ public class ExchangeRateServlet extends HttpServlet {
 
             CurrencyDto base = currencyService.getByCode(exchangeRateRequest.base());
             CurrencyDto target = currencyService.getByCode(exchangeRateRequest.target());
-            Double rate = Double.valueOf(exchangeRateRequest.rate());
+            BigDecimal rate = new BigDecimal(exchangeRateRequest.rate());
 
             ExchangeRateDto exchangeRateDto = new ExchangeRateDto(0L, base, target, rate);
             ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
@@ -103,10 +100,6 @@ public class ExchangeRateServlet extends HttpServlet {
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (!req.getServletPath().startsWith("/exchangeRate")) {
-            return;
-        }
-
         String pathInfo = req.getPathInfo();
 
         try {
@@ -127,7 +120,7 @@ public class ExchangeRateServlet extends HttpServlet {
                     exchangeRate.id(),
                     exchangeRate.baseCurrency(),
                     exchangeRate.targetCurrency(),
-                    Double.valueOf(rate)
+                    new BigDecimal(rate)
             );
             exchangeRateService.update(updatedRate);
 

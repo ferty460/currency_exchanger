@@ -56,12 +56,6 @@ public class CurrencyServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String servletPath = req.getServletPath();
-
-        if (!"/currencies".equals(servletPath)) {
-            return;
-        }
-
         try {
             CurrencyDto currency = new CurrencyDto(
                     0L,

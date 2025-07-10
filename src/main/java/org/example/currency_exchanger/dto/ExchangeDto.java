@@ -1,10 +1,12 @@
 package org.example.currency_exchanger.dto;
 
+import java.math.BigDecimal;
+
 public record ExchangeDto(
         CurrencyDto baseCurrency,
         CurrencyDto targetCurrency,
-        Double rate,
+        BigDecimal rate,
         Double amount,
-        Double convertedAmount
+        BigDecimal convertedAmount
 ) {
 }

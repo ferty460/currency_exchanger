@@ -98,7 +98,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
                 stmt -> {
                     stmt.setLong(1, entity.getBaseCurrency().getId());
                     stmt.setLong(2, entity.getTargetCurrency().getId());
-                    stmt.setDouble(3, entity.getRate());
+                    stmt.setBigDecimal(3, entity.getRate());
                 }
         );
 
@@ -112,7 +112,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
         JdbcTemplate.update(
                 UPDATE_SQL,
                 stmt -> {
-                    stmt.setDouble(1, entity.getRate());
+                    stmt.setBigDecimal(1, entity.getRate());
                     stmt.setLong(2, entity.getId());
                 }
         );
@@ -143,7 +143,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
                 resultSet.getLong(ID_COLUMN_NAME),
                 baseCurrency,
                 targetCurrency,
-                resultSet.getDouble(RATE_COLUMN_NAME)
+                resultSet.getBigDecimal(RATE_COLUMN_NAME)
         );
     }
 

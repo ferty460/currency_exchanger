@@ -12,12 +12,12 @@ import java.math.RoundingMode;
 @UtilityClass
 public class ExchangeFactory {
 
-    private static final double BASE_RATE_VALUE = 1.0;
+    private static final BigDecimal BASE_RATE_VALUE = BigDecimal.ONE;
     private static final int SCALE = 2;
 
     private final CurrencyMapper currencyMapper = CurrencyMapper.INSTANCE;
 
-    public static ExchangeDto createExchangeDto(Currency base, Currency target, double rate, double amount) {
+    public static ExchangeDto createExchangeDto(Currency base, Currency target, BigDecimal rate, double amount) {
         return new ExchangeDto(
                 currencyMapper.toDto(base),
                 currencyMapper.toDto(target),
@@ -31,33 +31,33 @@ public class ExchangeFactory {
         Currency baseCurrency = isReverse ? exchangeRate.getTargetCurrency() : exchangeRate.getBaseCurrency();
         Currency targetCurrency = isReverse ? exchangeRate.getBaseCurrency() : exchangeRate.getTargetCurrency();
 
-        double rate = isReverse ? BASE_RATE_VALUE / exchangeRate.getRate() : exchangeRate.getRate();
-        double roundedRate = BigDecimal.valueOf(rate).setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
+        BigDecimal inverseRate = BASE_RATE_VALUE.divide(exchangeRate.getRate(), SCALE, RoundingMode.HALF_UP);
+        BigDecimal directRate = exchangeRate.getRate().setScale(SCALE, RoundingMode.HALF_UP);
+        BigDecimal rate = isReverse ? inverseRate : directRate;
 
         return new ExchangeDto(
                 currencyMapper.toDto(baseCurrency),
                 currencyMapper.toDto(targetCurrency),
-                roundedRate,
+                rate,
                 amount,
-                convertAmount(roundedRate, amount)
+                convertAmount(rate, amount)
         );
     }
 
     public static ExchangeDto createCrossExchange(ExchangeRate usdToBase, ExchangeRate usdToTarget, double amount) {
-        double rate = usdToBase.getRate() / usdToTarget.getRate();
-        double roundedRate = BigDecimal.valueOf(rate).setScale(SCALE, RoundingMode.HALF_UP).doubleValue();
+        BigDecimal rate = usdToBase.getRate().divide(usdToTarget.getRate(), SCALE, RoundingMode.HALF_UP);
 
         return new ExchangeDto(
                 currencyMapper.toDto(usdToBase.getTargetCurrency()),
                 currencyMapper.toDto(usdToTarget.getTargetCurrency()),
-                roundedRate,
+                rate,
                 amount,
-                convertAmount(roundedRate, amount)
+                convertAmount(rate, amount)
         );
     }
 
-    private double convertAmount(double rate, double amount) {
-        return amount * rate;
+    private BigDecimal convertAmount(BigDecimal rate, double amount) {
+        return rate.multiply(BigDecimal.valueOf(amount));
     }
 
 }
