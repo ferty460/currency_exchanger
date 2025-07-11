@@ -15,6 +15,11 @@ public class CurrencyValidator implements Validator<CurrencyDto> {
         String name = currency.name();
         String sign = currency.sign();
 
+        nullValidate(code, name, sign);
+        paramCorrectnessValidate(code, name, sign);
+    }
+
+    private static void nullValidate(String code, String name, String sign) {
         if (code == null || code.isBlank()) {
             throw new ValidationException("Missing required field: code");
         }
@@ -24,10 +29,13 @@ public class CurrencyValidator implements Validator<CurrencyDto> {
         if (sign == null || sign.isBlank()) {
             throw new ValidationException("Missing required field: sign");
         }
+    }
+
+    private static void paramCorrectnessValidate(String code, String name, String sign) {
         if (!code.trim().matches(CURRENCY_CODE_REGEX)) {
             throw new ValidationException(
                     ("Invalid currency code: %s. Currency code must be 3 uppercase letters (ISO 4217 format).")
-                    .formatted(code));
+                            .formatted(code));
         }
         if (name.trim().length() > MAX_NAME_LENGTH) {
             throw new ValidationException("Name is too long. Max length is " + MAX_NAME_LENGTH);

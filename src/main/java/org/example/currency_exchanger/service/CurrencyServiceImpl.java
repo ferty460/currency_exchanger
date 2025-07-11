@@ -1,7 +1,7 @@
 package org.example.currency_exchanger.service;
 
+import org.example.currency_exchanger.context.ApplicationContext;
 import org.example.currency_exchanger.dao.CurrencyDao;
-import org.example.currency_exchanger.dao.CurrencyDaoImpl;
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.exception.DuplicateException;
@@ -14,19 +14,10 @@ import java.util.List;
 
 public class CurrencyServiceImpl implements CurrencyService {
 
-    private static final CurrencyService INSTANCE = new CurrencyServiceImpl();
-
-    private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
+    private final CurrencyDao currencyDao = ApplicationContext.getContext().get(CurrencyDao.class);
     private final CurrencyMapper mapper = CurrencyMapper.INSTANCE;
 
     private final Validator<CurrencyDto> currencyValidator = new CurrencyValidator();
-
-    private CurrencyServiceImpl() {
-    }
-
-    public static CurrencyService getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public List<CurrencyDto> getAll() {

@@ -1,35 +1,26 @@
 package org.example.currency_exchanger.service;
 
-import org.example.currency_exchanger.util.factory.ExchangeDtoFactory;
+import org.example.currency_exchanger.context.ApplicationContext;
 import org.example.currency_exchanger.dao.CurrencyDao;
-import org.example.currency_exchanger.dao.CurrencyDaoImpl;
 import org.example.currency_exchanger.dao.ExchangeRateDao;
-import org.example.currency_exchanger.dao.ExchangeRateDaoImpl;
 import org.example.currency_exchanger.dto.ExchangeDto;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.entity.ExchangeRate;
 import org.example.currency_exchanger.exception.NotFoundException;
+import org.example.currency_exchanger.util.factory.ExchangeDtoFactory;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 public class ExchangeServiceImpl implements ExchangeService {
 
-    private static final ExchangeService INSTANCE = new ExchangeServiceImpl();
-
     private static final String USD_CODE = "USD";
     private static final BigDecimal BASE_RATE = BigDecimal.ONE;
 
-    private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
-    private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
+    private final ApplicationContext context = ApplicationContext.getContext();
+    private final ExchangeRateDao exchangeRateDao = context.get(ExchangeRateDao.class);
+    private final CurrencyDao currencyDao = context.get(CurrencyDao.class);
     private final ExchangeDtoFactory exchangeDtoFactory = new ExchangeDtoFactory();
-
-    public static ExchangeService getInstance() {
-        return INSTANCE;
-    }
-
-    private ExchangeServiceImpl() {
-    }
 
     @Override
     public ExchangeDto exchange(String baseCode, String targetCode, String stringedAmount) {

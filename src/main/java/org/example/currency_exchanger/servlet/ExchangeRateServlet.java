@@ -4,13 +4,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.currency_exchanger.context.ApplicationContext;
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.dto.ExchangeRateDto;
 import org.example.currency_exchanger.dto.ExchangeRateRequest;
 import org.example.currency_exchanger.service.CurrencyService;
-import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.service.ExchangeRateService;
-import org.example.currency_exchanger.service.ExchangeRateServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
 import org.example.currency_exchanger.util.validation.ExchangeRateValidator;
 import org.example.currency_exchanger.util.validation.PathValidator;
@@ -29,8 +28,9 @@ public class ExchangeRateServlet extends HttpServlet {
     private static final String TARGET_CODE_PARAM = "targetCurrencyCode";
     private static final String RATE_PARAM = "rate";
 
-    private final ExchangeRateService exchangeRateService = ExchangeRateServiceImpl.getInstance();
-    private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
+    private final ApplicationContext context = ApplicationContext.getContext();
+    private final ExchangeRateService exchangeRateService = context.get(ExchangeRateService.class);
+    private final CurrencyService currencyService = context.get(CurrencyService.class);
     private final Validator<String> pathValidator = new PathValidator();
     private final Validator<ExchangeRateRequest> exchangeRateValidator = new ExchangeRateValidator();
 

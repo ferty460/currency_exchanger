@@ -16,6 +16,15 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
         String target = req.target();
         String rateStr = req.rate();
 
+        nullValidate(base, target, rateStr);
+        rateValidate(rateStr);
+
+        if (base.equals(target)) {
+            throw new ValidationException("Codes are the same: %s and %s".formatted(base, target));
+        }
+    }
+
+    private static void nullValidate(String base, String target, String rateStr) {
         if (base == null || base.isBlank()) {
             throw new ValidationException("Missing required field: baseCurrencyCode");
         }
@@ -25,7 +34,9 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
         if (rateStr == null || rateStr.isBlank()) {
             throw new ValidationException("Missing required field: rate");
         }
+    }
 
+    private static void rateValidate(String rateStr) {
         try {
             BigDecimal rate = new BigDecimal(rateStr);
             if (rate.compareTo(MIN_RATE) <= 0) {
@@ -36,10 +47,6 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
             }
         } catch (NumberFormatException e) {
             throw new ValidationException("Field 'rate' must be a number");
-        }
-
-        if (base.equals(target)) {
-            throw new ValidationException("Codes are the same: %s and %s".formatted(base, target));
         }
     }
 

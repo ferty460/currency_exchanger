@@ -1,6 +1,7 @@
 package org.example.currency_exchanger.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.currency_exchanger.context.ApplicationContext;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.entity.ExchangeRate;
 import org.example.currency_exchanger.exception.NotFoundException;
@@ -14,8 +15,6 @@ import java.util.Optional;
 
 @Slf4j
 public class ExchangeRateDaoImpl implements ExchangeRateDao {
-
-    private static final ExchangeRateDaoImpl INSTANCE = new ExchangeRateDaoImpl();
 
     private static final String ID_COLUMN_NAME = "id";
     private static final String BASE_CURRENCY_ID_COLUMN_NAME = "base_currency_id";
@@ -49,13 +48,6 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
             """;
 
     private static final String DELETE_SQL = "DELETE FROM exchange_rates WHERE id = ?;";
-
-    private ExchangeRateDaoImpl() {
-    }
-
-    public static ExchangeRateDaoImpl getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public Optional<ExchangeRate> findById(Long id) {
@@ -132,7 +124,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
     }
 
     private ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
-        CurrencyDaoImpl currencyDao = CurrencyDaoImpl.getInstance();
+        CurrencyDao currencyDao = ApplicationContext.getContext().get(CurrencyDao.class);
 
         long baseCurrencyId = resultSet.getLong(BASE_CURRENCY_ID_COLUMN_NAME);
         long targetCurrencyId = resultSet.getLong(TARGET_CURRENCY_ID_COLUMN_NAME);

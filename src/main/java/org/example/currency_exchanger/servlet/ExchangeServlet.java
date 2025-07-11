@@ -4,10 +4,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.currency_exchanger.context.ApplicationContext;
 import org.example.currency_exchanger.dto.ExchangeDto;
 import org.example.currency_exchanger.dto.ExchangeRequest;
 import org.example.currency_exchanger.service.ExchangeService;
-import org.example.currency_exchanger.service.ExchangeServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
 import org.example.currency_exchanger.util.validation.ExchangeValidator;
 import org.example.currency_exchanger.util.validation.Validator;
@@ -21,7 +21,7 @@ public class ExchangeServlet extends HttpServlet {
     private static final String TARGET_CURRENCY_PARAM = "to";
     private static final String AMOUNT_PARAM = "amount";
 
-    private final ExchangeService exchangeService = ExchangeServiceImpl.getInstance();
+    private final ExchangeService exchangeService = ApplicationContext.getContext().get(ExchangeService.class);
     private final Validator<ExchangeRequest> exchangeRequestValidator = new ExchangeValidator();
 
     @Override

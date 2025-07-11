@@ -4,9 +4,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.currency_exchanger.context.ApplicationContext;
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.service.CurrencyService;
-import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
 import org.example.currency_exchanger.util.validation.PathValidator;
 import org.example.currency_exchanger.util.validation.Validator;
@@ -21,7 +21,7 @@ public class CurrencyServlet extends HttpServlet {
     private static final String NAME_PARAM = "name";
     private static final String SIGN_PARAM = "sign";
 
-    private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
+    private final CurrencyService currencyService = ApplicationContext.getContext().get(CurrencyService.class);
     private final Validator<String> pathValidator = new PathValidator();
 
     @Override

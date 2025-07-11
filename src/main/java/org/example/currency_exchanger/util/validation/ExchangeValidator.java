@@ -14,6 +14,11 @@ public class ExchangeValidator implements Validator<ExchangeRequest> {
         String to = req.target();
         String amountStr = req.amount();
 
+        nullValidate(from, to, amountStr);
+        amountValidate(amountStr);
+    }
+
+    private static void nullValidate(String from, String to, String amountStr) {
         if (from == null || from.isBlank()) {
             throw new ValidationException("Missing required parameter: from");
         }
@@ -23,7 +28,9 @@ public class ExchangeValidator implements Validator<ExchangeRequest> {
         if (amountStr == null || amountStr.isBlank()) {
             throw new ValidationException("Missing required parameter: amount");
         }
+    }
 
+    private static void amountValidate(String amountStr) {
         try {
             double amount = Double.parseDouble(amountStr);
             if (amount <= MIN_AMOUNT) {

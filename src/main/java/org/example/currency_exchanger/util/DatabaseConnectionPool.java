@@ -39,6 +39,16 @@ public class DatabaseConnectionPool {
         }
     }
 
+    public static void shutdown() {
+        for (Connection conn : pool) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw new DatabaseAccessException(e.getMessage());
+            }
+        }
+    }
+
     private static void loadDriver() {
         try {
             Class.forName(PropertiesUtil.getProperty(DRIVER_KEY));

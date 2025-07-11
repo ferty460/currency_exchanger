@@ -13,8 +13,6 @@ import java.util.Optional;
 @Slf4j
 public class CurrencyDaoImpl implements CurrencyDao {
 
-    private static final CurrencyDaoImpl INSTANCE = new CurrencyDaoImpl();
-
     private static final String ID_COLUMN_NAME = "id";
     private static final String CODE_COLUMN_NAME = "code";
     private static final String FULL_NAME_COLUMN_NAME = "full_name";
@@ -41,13 +39,6 @@ public class CurrencyDaoImpl implements CurrencyDao {
             """;
 
     private static final String DELETE_SQL = "DELETE FROM currencies WHERE id = ?;";
-
-    private CurrencyDaoImpl() {
-    }
-
-    public static CurrencyDaoImpl getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public Optional<Currency> findById(Long id) {
