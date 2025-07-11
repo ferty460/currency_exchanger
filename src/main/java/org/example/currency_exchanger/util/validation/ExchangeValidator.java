@@ -1,4 +1,4 @@
-package org.example.currency_exchanger.validation;
+package org.example.currency_exchanger.util.validation;
 
 import org.example.currency_exchanger.dto.ExchangeRequest;
 import org.example.currency_exchanger.exception.ValidationException;
@@ -6,7 +6,7 @@ import org.example.currency_exchanger.exception.ValidationException;
 public class ExchangeValidator implements Validator<ExchangeRequest> {
 
     private static final double MIN_AMOUNT = 0.0;
-    private static final double MAX_AMOUNT = 1000000.0;
+    private static final double MAX_AMOUNT = 1_000_000.0;
 
     @Override
     public void validate(ExchangeRequest req) throws ValidationException {

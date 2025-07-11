@@ -1,4 +1,4 @@
-package org.example.currency_exchanger.factory;
+package org.example.currency_exchanger.util.factory;
 
 import org.example.currency_exchanger.dto.ExchangeDto;
 import org.example.currency_exchanger.entity.Currency;

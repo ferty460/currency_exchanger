@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @UtilityClass
 public class WebUtil {
 
@@ -31,7 +33,9 @@ public class WebUtil {
     public static void sendError(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
         Map<String, String> error = Map.of(MESSAGE_KEY, message);
+
         mapper.writeValue(response.getWriter(), error);
+        log.error("[{}] {}", status, message);
     }
 
     public Map<String, String> getRequestParameters(HttpServletRequest req) throws IOException {

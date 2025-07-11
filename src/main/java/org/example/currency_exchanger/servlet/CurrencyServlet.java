@@ -8,8 +8,8 @@ import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
-import org.example.currency_exchanger.validation.PathValidator;
-import org.example.currency_exchanger.validation.Validator;
+import org.example.currency_exchanger.util.validation.PathValidator;
+import org.example.currency_exchanger.util.validation.Validator;
 
 import java.io.IOException;
 import java.util.List;

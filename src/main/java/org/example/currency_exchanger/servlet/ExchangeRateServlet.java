@@ -12,9 +12,9 @@ import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.service.ExchangeRateService;
 import org.example.currency_exchanger.service.ExchangeRateServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
-import org.example.currency_exchanger.validation.ExchangeRateValidator;
-import org.example.currency_exchanger.validation.PathValidator;
-import org.example.currency_exchanger.validation.Validator;
+import org.example.currency_exchanger.util.validation.ExchangeRateValidator;
+import org.example.currency_exchanger.util.validation.PathValidator;
+import org.example.currency_exchanger.util.validation.Validator;
 
 import java.io.IOException;
 import java.math.BigDecimal;

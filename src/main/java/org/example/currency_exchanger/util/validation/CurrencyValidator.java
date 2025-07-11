@@ -1,4 +1,4 @@
-package org.example.currency_exchanger.validation;
+package org.example.currency_exchanger.util.validation;
 
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.exception.ValidationException;

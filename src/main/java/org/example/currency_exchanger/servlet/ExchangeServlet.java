@@ -9,8 +9,8 @@ import org.example.currency_exchanger.dto.ExchangeRequest;
 import org.example.currency_exchanger.service.ExchangeService;
 import org.example.currency_exchanger.service.ExchangeServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
-import org.example.currency_exchanger.validation.ExchangeValidator;
-import org.example.currency_exchanger.validation.Validator;
+import org.example.currency_exchanger.util.validation.ExchangeValidator;
+import org.example.currency_exchanger.util.validation.Validator;
 
 import java.io.IOException;
 

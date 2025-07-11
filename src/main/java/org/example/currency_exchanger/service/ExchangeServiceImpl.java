@@ -1,6 +1,6 @@
 package org.example.currency_exchanger.service;
 
-import org.example.currency_exchanger.factory.ExchangeDtoFactory;
+import org.example.currency_exchanger.util.factory.ExchangeDtoFactory;
 import org.example.currency_exchanger.dao.CurrencyDao;
 import org.example.currency_exchanger.dao.CurrencyDaoImpl;
 import org.example.currency_exchanger.dao.ExchangeRateDao;

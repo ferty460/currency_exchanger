@@ -7,8 +7,8 @@ import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.exception.DuplicateException;
 import org.example.currency_exchanger.exception.NotFoundException;
 import org.example.currency_exchanger.mapper.CurrencyMapper;
-import org.example.currency_exchanger.validation.CurrencyValidator;
-import org.example.currency_exchanger.validation.Validator;
+import org.example.currency_exchanger.util.validation.CurrencyValidator;
+import org.example.currency_exchanger.util.validation.Validator;
 
 import java.util.List;
 

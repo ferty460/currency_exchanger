@@ -1,5 +1,6 @@
 package org.example.currency_exchanger.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.util.template.JdbcTemplate;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class CurrencyDaoImpl implements CurrencyDao {
 
     private static final CurrencyDaoImpl INSTANCE = new CurrencyDaoImpl();
@@ -93,6 +95,7 @@ public class CurrencyDaoImpl implements CurrencyDao {
 
         entity.setId(generatedId);
 
+        log.info("Saved currency: {}", entity);
         return entity;
     }
 
@@ -107,6 +110,7 @@ public class CurrencyDaoImpl implements CurrencyDao {
                     stmt.setLong(4, entity.getId());
                 }
         );
+        log.info("Currency with id {} was updated: {}", entity.getId(), entity);
     }
 
     @Override
@@ -115,6 +119,7 @@ public class CurrencyDaoImpl implements CurrencyDao {
                 DELETE_SQL,
                 stmt -> stmt.setLong(1, id)
         );
+        log.info("Currency with id {} was deleted", id);
     }
 
     private Currency buildCurrency(ResultSet resultSet) throws SQLException  {

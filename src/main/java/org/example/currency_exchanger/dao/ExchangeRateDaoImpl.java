@@ -1,5 +1,6 @@
 package org.example.currency_exchanger.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.entity.ExchangeRate;
 import org.example.currency_exchanger.exception.NotFoundException;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class ExchangeRateDaoImpl implements ExchangeRateDao {
 
     private static final ExchangeRateDaoImpl INSTANCE = new ExchangeRateDaoImpl();
@@ -104,6 +106,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
 
         entity.setId(generatedId);
 
+        log.info("Saved exchange rate {}", entity);
         return entity;
     }
 
@@ -116,6 +119,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
                     stmt.setLong(2, entity.getId());
                 }
         );
+        log.info("Exchange rate with id {} was updated: {}", entity.getId(), entity);
     }
 
     @Override
@@ -124,6 +128,7 @@ public class ExchangeRateDaoImpl implements ExchangeRateDao {
                 DELETE_SQL,
                 stmt -> stmt.setLong(1, id)
         );
+        log.info("Exchange rate with id {} was deleted", id);
     }
 
     private ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {
