@@ -7,9 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.example.currency_exchanger.dto.CurrencyDto;
 import org.example.currency_exchanger.dto.ExchangeRateDto;
 import org.example.currency_exchanger.dto.ExchangeRateRequest;
-import org.example.currency_exchanger.exception.DuplicateException;
-import org.example.currency_exchanger.exception.NotFoundException;
-import org.example.currency_exchanger.exception.ValidationException;
 import org.example.currency_exchanger.service.CurrencyService;
 import org.example.currency_exchanger.service.CurrencyServiceImpl;
 import org.example.currency_exchanger.service.ExchangeRateService;
@@ -22,7 +19,6 @@ import org.example.currency_exchanger.validation.Validator;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet(urlPatterns = {"/exchangeRates", "/exchangeRate/*"})
 public class ExchangeRateServlet extends HttpServlet {
@@ -35,103 +31,91 @@ public class ExchangeRateServlet extends HttpServlet {
 
     private final ExchangeRateService exchangeRateService = ExchangeRateServiceImpl.getInstance();
     private final CurrencyService currencyService = CurrencyServiceImpl.getInstance();
-
     private final Validator<String> pathValidator = new PathValidator();
     private final Validator<ExchangeRateRequest> exchangeRateValidator = new ExchangeRateValidator();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String servletPath = req.getServletPath();
-        String pathInfo = req.getPathInfo();
 
-        try {
-            if ("/exchangeRates".equals(servletPath)) {
-                List<ExchangeRateDto> exchangeRates = exchangeRateService.getAll();
-
-                WebUtil.sendResponse(resp, exchangeRates, HttpServletResponse.SC_OK);
-            } else if (servletPath.startsWith("/exchangeRate")) {
-                pathValidator.validate(pathInfo);
-
-                String codes = pathInfo.substring(CODES_INDEX);
-                String baseCode = codes.substring(0, CODE_LENGTH);
-                String targetCode = codes.substring(CODE_LENGTH);
-
-                ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
-
-                WebUtil.sendResponse(resp, exchangeRate, HttpServletResponse.SC_OK);
-            }
-        } catch (ValidationException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        } catch (NotFoundException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (Exception e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        if ("/exchangeRates".equals(servletPath)) {
+            handleGetAll(resp);
+        } else if (servletPath.startsWith("/exchangeRate")) {
+            handleGetByCodes(req, resp);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(
-                    req.getParameter(BASE_CODE_PARAM),
-                    req.getParameter(TARGET_CODE_PARAM),
-                    req.getParameter(RATE_PARAM)
-            );
-            exchangeRateValidator.validate(exchangeRateRequest);
+        ExchangeRateRequest request = extractExchangeRateRequest(req);
+        exchangeRateValidator.validate(request);
 
-            CurrencyDto base = currencyService.getByCode(exchangeRateRequest.base());
-            CurrencyDto target = currencyService.getByCode(exchangeRateRequest.target());
-            BigDecimal rate = new BigDecimal(exchangeRateRequest.rate());
+        ExchangeRateDto exchangeRateDto = buildExchangeRateDto(request);
+        ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
 
-            ExchangeRateDto exchangeRateDto = new ExchangeRateDto(0L, base, target, rate);
-            ExchangeRateDto savedExchangeRate = exchangeRateService.save(exchangeRateDto);
-
-            WebUtil.sendResponse(resp, savedExchangeRate, HttpServletResponse.SC_CREATED);
-        } catch (ValidationException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        } catch (NotFoundException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (DuplicateException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_CONFLICT, e.getMessage());
-        } catch (Exception e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+        WebUtil.sendResponse(resp, savedExchangeRate, HttpServletResponse.SC_CREATED);
     }
 
     @Override
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String pathInfo = req.getPathInfo();
+        pathValidator.validate(pathInfo);
 
-        try {
-            pathValidator.validate(pathInfo);
+        String base = pathInfo.substring(CODES_INDEX, CODES_INDEX + CODE_LENGTH);
+        String target = pathInfo.substring(CODES_INDEX + CODE_LENGTH);
+        String rate = WebUtil.getRequestParameters(req).get(RATE_PARAM);
 
-            Map<String, String> params = WebUtil.getRequestParameters(req);
-            String codes = pathInfo.substring(CODES_INDEX);
+        ExchangeRateRequest request = new ExchangeRateRequest(base, target, rate);
+        exchangeRateValidator.validate(request);
 
-            String base = codes.substring(0, CODE_LENGTH);
-            String target = codes.substring(CODE_LENGTH);
-            String rate = params.get(RATE_PARAM);
+        ExchangeRateDto existingRate = exchangeRateService.getByBaseCodeAndTargetCode(base, target);
+        ExchangeRateDto updatedRate = updateExchangeRateDto(existingRate, rate);
 
-            ExchangeRateRequest exchangeRateRequest = new ExchangeRateRequest(base, target, rate);
-            exchangeRateValidator.validate(exchangeRateRequest);
+        exchangeRateService.update(updatedRate);
+        WebUtil.sendResponse(resp, updatedRate, HttpServletResponse.SC_OK);
+    }
 
-            ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(base, target);
-            ExchangeRateDto updatedRate = new ExchangeRateDto(
-                    exchangeRate.id(),
-                    exchangeRate.baseCurrency(),
-                    exchangeRate.targetCurrency(),
-                    new BigDecimal(rate)
-            );
-            exchangeRateService.update(updatedRate);
 
-            WebUtil.sendResponse(resp, updatedRate, HttpServletResponse.SC_OK);
-        } catch (ValidationException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        } catch (NotFoundException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (Exception e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+    private void handleGetAll(HttpServletResponse resp) throws IOException {
+        List<ExchangeRateDto> exchangeRates = exchangeRateService.getAll();
+        WebUtil.sendResponse(resp, exchangeRates, HttpServletResponse.SC_OK);
+    }
+
+    private void handleGetByCodes(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String pathInfo = req.getPathInfo();
+        pathValidator.validate(pathInfo);
+
+        String codes = pathInfo.substring(CODES_INDEX);
+        String baseCode = codes.substring(0, CODE_LENGTH);
+        String targetCode = codes.substring(CODE_LENGTH);
+
+        ExchangeRateDto exchangeRate = exchangeRateService.getByBaseCodeAndTargetCode(baseCode, targetCode);
+        WebUtil.sendResponse(resp, exchangeRate, HttpServletResponse.SC_OK);
+    }
+
+    private ExchangeRateRequest extractExchangeRateRequest(HttpServletRequest req) {
+        return new ExchangeRateRequest(
+                req.getParameter(BASE_CODE_PARAM),
+                req.getParameter(TARGET_CODE_PARAM),
+                req.getParameter(RATE_PARAM)
+        );
+    }
+
+    private ExchangeRateDto buildExchangeRateDto(ExchangeRateRequest request) {
+        CurrencyDto base = currencyService.getByCode(request.base());
+        CurrencyDto target = currencyService.getByCode(request.target());
+        BigDecimal rate = new BigDecimal(request.rate());
+
+        return new ExchangeRateDto(0L, base, target, rate);
+    }
+
+    private ExchangeRateDto updateExchangeRateDto(ExchangeRateDto existingRate, String newRate) {
+        return new ExchangeRateDto(
+                existingRate.id(),
+                existingRate.baseCurrency(),
+                existingRate.targetCurrency(),
+                new BigDecimal(newRate)
+        );
     }
 
 }

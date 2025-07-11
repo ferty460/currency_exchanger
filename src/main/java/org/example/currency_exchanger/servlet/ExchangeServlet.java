@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.currency_exchanger.dto.ExchangeDto;
 import org.example.currency_exchanger.dto.ExchangeRequest;
-import org.example.currency_exchanger.exception.NotFoundException;
-import org.example.currency_exchanger.exception.ValidationException;
 import org.example.currency_exchanger.service.ExchangeService;
 import org.example.currency_exchanger.service.ExchangeServiceImpl;
 import org.example.currency_exchanger.util.WebUtil;
@@ -28,24 +26,16 @@ public class ExchangeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        try {
-            String base = req.getParameter(BASE_CURRENCY_PARAM);
-            String target = req.getParameter(TARGET_CURRENCY_PARAM);
-            String amount = req.getParameter(AMOUNT_PARAM);
+        String base = req.getParameter(BASE_CURRENCY_PARAM);
+        String target = req.getParameter(TARGET_CURRENCY_PARAM);
+        String amount = req.getParameter(AMOUNT_PARAM);
 
-            ExchangeRequest exchangeRequest = new ExchangeRequest(base, target, amount);
-            exchangeRequestValidator.validate(exchangeRequest);
+        ExchangeRequest exchangeRequest = new ExchangeRequest(base, target, amount);
+        exchangeRequestValidator.validate(exchangeRequest);
 
-            ExchangeDto exchangeDto = exchangeService.exchange(base, target, amount);
+        ExchangeDto exchangeDto = exchangeService.exchange(base, target, amount);
 
-            WebUtil.sendResponse(resp, exchangeDto, HttpServletResponse.SC_OK);
-        } catch (ValidationException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        } catch (NotFoundException e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (Exception e) {
-            WebUtil.sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+        WebUtil.sendResponse(resp, exchangeDto, HttpServletResponse.SC_OK);
     }
 
 }

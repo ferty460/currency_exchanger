@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 
 public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
 
+    private static final BigDecimal MIN_RATE = BigDecimal.ZERO;
+    private static final BigDecimal MAX_RATE = new BigDecimal("1000000");
+
     @Override
     public void validate(ExchangeRateRequest req) throws ValidationException {
         String base = req.base();
@@ -23,10 +26,13 @@ public class ExchangeRateValidator implements Validator<ExchangeRateRequest> {
             throw new ValidationException("Missing required field: rate");
         }
 
-        BigDecimal rate = new BigDecimal(rateStr);
         try {
-            if (rate.compareTo(BigDecimal.ZERO) <= 0) {
+            BigDecimal rate = new BigDecimal(rateStr);
+            if (rate.compareTo(MIN_RATE) <= 0) {
                 throw new ValidationException("Rate must be greater than 0");
+            }
+            if (rate.compareTo(MAX_RATE) > 0) {
+                throw new ValidationException("Rate must not exceed " + MAX_RATE);
             }
         } catch (NumberFormatException e) {
             throw new ValidationException("Field 'rate' must be a number");

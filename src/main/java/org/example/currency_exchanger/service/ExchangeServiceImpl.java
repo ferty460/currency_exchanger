@@ -1,5 +1,6 @@
 package org.example.currency_exchanger.service;
 
+import org.example.currency_exchanger.factory.ExchangeDtoFactory;
 import org.example.currency_exchanger.dao.CurrencyDao;
 import org.example.currency_exchanger.dao.CurrencyDaoImpl;
 import org.example.currency_exchanger.dao.ExchangeRateDao;
@@ -8,7 +9,6 @@ import org.example.currency_exchanger.dto.ExchangeDto;
 import org.example.currency_exchanger.entity.Currency;
 import org.example.currency_exchanger.entity.ExchangeRate;
 import org.example.currency_exchanger.exception.NotFoundException;
-import org.example.currency_exchanger.util.ExchangeFactory;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -22,6 +22,7 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private final ExchangeRateDao exchangeRateDao = ExchangeRateDaoImpl.getInstance();
     private final CurrencyDao currencyDao = CurrencyDaoImpl.getInstance();
+    private final ExchangeDtoFactory exchangeDtoFactory = new ExchangeDtoFactory();
 
     public static ExchangeService getInstance() {
         return INSTANCE;
@@ -34,29 +35,39 @@ public class ExchangeServiceImpl implements ExchangeService {
     public ExchangeDto exchange(String baseCode, String targetCode, String stringedAmount) {
         double amount = Double.parseDouble(stringedAmount);
 
-        Optional<Currency> baseCurrency = currencyDao.findByCode(baseCode);
-        Optional<Currency> targetCurrency = currencyDao.findByCode(targetCode);
-        if (baseCode.equals(targetCode) && baseCurrency.isPresent() && targetCurrency.isPresent()) {
-            return ExchangeFactory.createExchangeDto(baseCurrency.get(), targetCurrency.get(), BASE_RATE, amount);
+        Currency baseCurrency = getCurrencyOrThrow(baseCode);
+        Currency targetCurrency = getCurrencyOrThrow(targetCode);
+
+        if (baseCurrency.getCode().equals(targetCurrency.getCode())) {
+            return exchangeDtoFactory.fromRaw(baseCurrency, targetCurrency, BASE_RATE, amount);
         }
 
-        Optional<ExchangeRate> directRate = exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode);
-        if (directRate.isPresent()) {
-            return ExchangeFactory.createExchangeFromExchangeRate(directRate.get(), amount, false);
-        }
+        return findExchangeRate(baseCode, targetCode, amount)
+                .orElseThrow(() -> new NotFoundException("Can't find exchange rate to exchange"));
+    }
 
-        Optional<ExchangeRate> reverseRate = exchangeRateDao.findByBaseCodeAndTargetCode(targetCode, baseCode);
-        if (reverseRate.isPresent()) {
-            return ExchangeFactory.createExchangeFromExchangeRate(reverseRate.get(), amount, true);
-        }
+    private Currency getCurrencyOrThrow(String code) {
+        return currencyDao.findByCode(code)
+                .orElseThrow(() -> new NotFoundException("Currency not found: " + code));
+    }
 
+    private Optional<ExchangeDto> findExchangeRate(String baseCode, String targetCode, double amount) {
+        return exchangeRateDao.findByBaseCodeAndTargetCode(baseCode, targetCode)
+                .map(rate -> exchangeDtoFactory.fromExchangeRate(rate, amount, false))
+                .or(() -> exchangeRateDao.findByBaseCodeAndTargetCode(targetCode, baseCode)
+                        .map(rate -> exchangeDtoFactory.fromExchangeRate(rate, amount, true)))
+                .or(() -> tryCrossExchange(baseCode, targetCode, amount));
+    }
+
+    private Optional<ExchangeDto> tryCrossExchange(String baseCode, String targetCode, double amount) {
         Optional<ExchangeRate> usdToBase = exchangeRateDao.findByBaseCodeAndTargetCode(USD_CODE, baseCode);
         Optional<ExchangeRate> usdToTarget = exchangeRateDao.findByBaseCodeAndTargetCode(USD_CODE, targetCode);
+
         if (usdToBase.isPresent() && usdToTarget.isPresent()) {
-            return ExchangeFactory.createCrossExchange(usdToBase.get(), usdToTarget.get(), amount);
+            return Optional.of(exchangeDtoFactory.fromCrossRates(usdToBase.get(), usdToTarget.get(), amount));
         }
 
-        throw new NotFoundException("Can't find exchange rate to exchange");
+        return Optional.empty();
     }
 
 }
