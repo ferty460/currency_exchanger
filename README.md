@@ -57,7 +57,7 @@ REST API для описания валют и обменных курсов.
 
 ## Документация API
 
-**Базовый адрес:** `http://localhost:8081/currency_exchanger_war_exploded` \
+**Базовый адрес:** `http://localhost:8080/` \
 **Формат ответа:** JSON
 
 ### Получение валют
