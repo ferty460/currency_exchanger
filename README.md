@@ -292,3 +292,6 @@ REST API для описания валют и обменных курсов.
   "convertedAmount": 1.5
 }
 ```
+
+**Весь функционал можно протестировать, 
+импортировав файл `currency_exchanger.postman_collection.json` в ваш Postman**

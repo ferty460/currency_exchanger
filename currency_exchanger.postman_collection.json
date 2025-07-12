@@ -1,0 +1,312 @@
+{
+	"info": {
+		"_postman_id": "1aa64203-9e49-4215-aea3-afd6215061c0",
+		"name": "currency_exchanger",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34897463"
+	},
+	"item": [
+		{
+			"name": "currency",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/currencies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"currencies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "by code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/currency/USD",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"currency",
+								"USD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new currency",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "code",
+									"value": "SAD",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "hehehaha",
+									"type": "text"
+								},
+								{
+									"key": "sign",
+									"value": "Ы",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/currencies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"currencies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "exchange rate",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "code",
+									"value": "ASD",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Australian Saint Dollar",
+									"type": "text"
+								},
+								{
+									"key": "sign",
+									"value": "Ы",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/exchangeRates",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"exchangeRates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "by codes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/exchangeRate/USDRUB",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"exchangeRate",
+								"USDRUB"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "new exchange rate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "baseCurrencyCode",
+									"value": "KZT",
+									"type": "text"
+								},
+								{
+									"key": "targetCurrencyCode",
+									"value": "RUB",
+									"type": "text"
+								},
+								{
+									"key": "rate",
+									"value": "0.15",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/exchangeRates",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"exchangeRates"
+							],
+							"query": [
+								{
+									"key": "baseCurrencyCode",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "targetCurrencyCode",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "rate",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "rate",
+									"value": "0.78",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/exchangeRate/USDRUB",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"exchangeRate",
+								"USDRUB"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "exchange",
+			"item": [
+				{
+					"name": "convert",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "rate",
+									"value": "-23213",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8081/currency_exchanger_war_exploded/exchange?from=KZT&to=RUB&amount=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"currency_exchanger_war_exploded",
+								"exchange"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "KZT"
+								},
+								{
+									"key": "to",
+									"value": "RUB"
+								},
+								{
+									"key": "amount",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
