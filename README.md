@@ -22,18 +22,38 @@ REST API для описания валют и обменных курсов.
 - SQLite (база хранится в `.sqlite`-файле)
 
 ### Шаги установки
-1. Клонируйте репозиторий
-   - `git clone https://github.com/ferty460/currency_exchanger.git`
-2. Настройте базу данных:
-   - Создайте файл `.sqlite`
-   - Выполните запросы, описанные в папке `src/main/resources/db/scripts` проекта
-   - Введите адрес вашей БД в `src/main/resources/application.properties` (`db.url`)
-3. Соберите проект
-   - `mvn clean package`
+
+1. **Клонируйте репозиторий**
+
+   ```bash
+   git clone https://github.com/ferty460/currency_exchanger.git
+   ```
+
+2. **Настройте базу данных**
+
+   - Создайте (или укажите путь к) пустому `.sqlite`-файлу на вашем компьютере.
+   Например: `C:\data\currency.sqlite` или `./currency.sqlite`
+   - Укажите путь к БД в файле src/main/resources/application.properties:
+
+   ```properties
+   db.url=jdbc:sqlite:/полный/путь/к/вашей/bd.sqlite
+   ```
+
+3. **Соберите проект**
+
+   ```bash
+   mvn clean package
+   ```
+
    - После сборки в папке `target` появится файл `ROOT.war`
-4. Разместите файл в Tomcat
-   - Скопируйте `ROOT.war` файл в папку `webapps` вашего Tomcat
+
+4. **Разместите приложение в Tomcat**
+
+   - Скопируйте `ROOT.war` в папку `webapps` вашего Tomcat-сервера
+
 5. Перезапустите Tomcat
+
+   - После перезапуска приложение будет доступно по адресу `http://localhost:8080/`
 
 ## Документация API
 

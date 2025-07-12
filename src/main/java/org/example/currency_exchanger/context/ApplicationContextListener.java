@@ -9,6 +9,7 @@ import org.example.currency_exchanger.dao.ExchangeRateDao;
 import org.example.currency_exchanger.dao.ExchangeRateDaoImpl;
 import org.example.currency_exchanger.service.*;
 import org.example.currency_exchanger.util.DatabaseConnectionPool;
+import org.example.currency_exchanger.util.MigrationRunner;
 
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
@@ -17,6 +18,8 @@ public class ApplicationContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        MigrationRunner.migrate();
+
         context.register(CurrencyDao.class, new CurrencyDaoImpl());
         context.register(ExchangeRateDao.class, new ExchangeRateDaoImpl());
         context.register(CurrencyService.class, new CurrencyServiceImpl());
